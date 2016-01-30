@@ -25,7 +25,7 @@ make_pair = lambda first: lambda second: lambda func: func(first)(second)
 
 # Truth values and conditional expression
 #     <condition>?<expression>:<expression>
-cond = lambda e1: lambda e2: lambda c: c(lambda : e1)(lambda : e2)
+cond = lambda e1: lambda e2: lambda c: c(e1())(e2())
 
 true = select_first
 
@@ -40,70 +40,9 @@ _and = lambda x: lambda y: x(y)(false)
 # OR <operand> OR <operand>
 _or = lambda x: lambda y: x(true)(y)
 
-zero = identify
+zero  = lambda f: lambda z: z
+one   = lambda f: lambda z: f(z)
+two   = lambda f: lambda z: f(f(z))
+three = lambda f: lambda z: f(f(f(z)))
 
-# succ = λn.λs((s false) n)
-def _succ_():
-    return lambda n: lambda s: s(false)(n)
-
-succ = _succ_()
-
-one = succ(zero)
-
-# one ==
-# (succ zero) == 
-# (λn.λs.((s false) n) zero) =>
-# λs.((s false) zero)
-
-two = succ(one)
-
-# two ==
-# (succ one) ==
-# (λn.λs.((s false) n) one) =>
-# λs.((s false) one) ==
-# λs.((s false) λs.((s false) zero))
-
-three = succ(two)
-
-# three ==
-# (succ two) ==
-# (λn.λs((s false) n) two) ==
-# (λn.λs((s false) n) λs.((s false) λs.((s false) zero)))
-
-# λs.((s false) <number>)
-# (λs.((s false) <number>) select_first) =>
-# ((select_first false) <number>) ==
-# ((λfirst.λsecond.first false) <number>) =>
-# (λsecond.false <number>) =>
-# false
-
-# (zero select_first) ==
-# (λx.x select_first) =>
-# select_first ==
-# true
-def _iszero_():
-    return lambda n: n(select_first)
-
-iszero = _iszero_()
-
-# (pred one) => ... => zero
-# (pred two) => ... => one
-# (pred three) => ... => two
-
-# (λs.((s false) <number>) select_second) =>
-# ((select_second false) <number) ==
-# ((λfirst.λsecond.second false) <number>) =>
-# (λsecond.second <number>) =>
-# <number>
-
-def _pred():
-    return lambda n: iszero(n)(zero)(n(select_second))
-pred = _pred()
-
-Y = lambda f: (lambda x: x(x))(lambda y: f(lambda *args: y(y)(*args)))
-
-def add1():
-    return lambda f: lambda x: lambda y: cond(x)(f(succ(x)(pred(y))))
-
-def add():
-    return Y(add1())
+SUCC = lambda n: lambda f: lambda z: f(n(f)(z))
