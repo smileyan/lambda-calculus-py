@@ -40,9 +40,31 @@ _and = lambda x: lambda y: x(y)(false)
 # OR <operand> OR <operand>
 _or = lambda x: lambda y: x(true)(y)
 
-zero  = lambda f: lambda z: z
-one   = lambda f: lambda z: f(z)
-two   = lambda f: lambda z: f(f(z))
-three = lambda f: lambda z: f(f(f(z)))
+# zero  = lambda f: lambda z: z
+# one   = lambda f: lambda z: f(z)
+# two   = lambda f: lambda z: f(f(z))
+# three = lambda f: lambda z: f(f(f(z)))
 
-SUCC = lambda n: lambda f: lambda z: f(n(f)(z))
+succ  = lambda n: lambda s: s(false)(n)
+iszero = lambda n: n(select_first)
+pred = lambda n: iszero(n)(zero)(n(select_second))
+
+zero  = identify
+one   = succ(zero)
+two   = succ(one)
+three = succ(two)
+
+
+def add(x, y):
+    if iszero(y) == true:
+        return x
+    else:
+        return add(succ(x), pred(y))
+
+def add1(f):
+    def sum(x, y):
+        if iszero(y) == true:
+            return x
+        else:
+            return f(succ(x))(pred(y))
+    return sum

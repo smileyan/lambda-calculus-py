@@ -3,7 +3,7 @@ import unittest
 from app.lambda_calculus import identify, self_apply, apply
 from app.lambda_calculus import select_first, select_second, make_pair
 from app.lambda_calculus import cond, true, false, _not, _and, _or
-from app.lambda_calculus import zero, one, two, three 
+from app.lambda_calculus import zero, succ, one, two, three, iszero, pred
 
 class TestLambdaCulculus(unittest.TestCase):
 
@@ -50,7 +50,8 @@ class TestLambdaCulculus(unittest.TestCase):
         self.assertEqual(true, _or(true)(true))
 
     def test_numbers(self):
-        self.assertEqual(0, zero(lambda x: x+1)(0))
-        self.assertEqual(1, one(lambda x: x+1)(0))
-        self.assertEqual(2, two(lambda x: x+1)(0))
-        self.assertEqual(3, three(lambda x: x+1)(0))
+        self.assertEqual(identify, zero)
+        self.assertEqual(true, iszero(zero))
+        self.assertEqual(false, iszero(one))
+        self.assertEqual(zero, pred(one))
+        self.assertEqual(one, pred(two))
