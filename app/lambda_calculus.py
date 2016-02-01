@@ -54,17 +54,26 @@ one   = succ(zero)
 two   = succ(one)
 three = succ(two)
 
+# U Combinator
+U = lambda f: f(f)
 
-def add(x, y):
-    if iszero(y) == true:
-        return x
-    else:
-        return add(succ(x), pred(y))
+add  = U(lambda f: lambda a: lambda b: a if b <= 0 else 1 + U(f)(a)(b-1))
+mul  = U(lambda f: lambda a: lambda b: 0 if b <= 0 else a + U(f)(a)(b-1))
+pow  = U(lambda f: lambda a: lambda b: 1 if b <= 0 else a * U(f)(a)(b-1))
+sub  = U(lambda f: lambda a: lambda b: a if b <= 0 else 0 + U(f)(a-1)(b-1))
+fact = U(lambda f: lambda n: 1 if n <= 0 else n*(U(f))(n-1))
 
-def add1(f):
-    def sum(x, y):
-        if iszero(y) == true:
-            return x
-        else:
-            return f(succ(x))(pred(y))
-    return sum
+equal = U(lambda f: lambda a: lambda b: True if ((a==0) and (b==0)) else (False if (a==0) or (b==0) else U(f)(a-1)(b-1)))
+greater = lambda a: lambda b: sub(a)(b) > 0
+
+# Y Combinator: x = f(x)
+# The fixed point of a function f is the value x such that x=f(x)
+# Y(F) == F(Y(F))
+# Y = lambda F: F(Y(F))
+# e == lambda x: e(x)
+# Y = lambda F: F(lambda x:Y(F)(x))
+# apply the U combinator to eliminate the explicit recursion in the definition of Y
+Y = U(lambda h: lambda F: F(lambda x:U(h)(F)(x)))
+
+fact_y = Y(lambda f: lambda n: 1 if n <= 0 else n*f(n-1))
+add_y  = Y(lambda f: lambda a: lambda b: a if b <= 0 else 1 + f(a)(b-1))

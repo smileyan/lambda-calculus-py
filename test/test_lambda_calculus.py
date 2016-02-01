@@ -4,6 +4,8 @@ from app.lambda_calculus import identify, self_apply, apply
 from app.lambda_calculus import select_first, select_second, make_pair
 from app.lambda_calculus import cond, true, false, _not, _and, _or
 from app.lambda_calculus import zero, succ, one, two, three, iszero, pred
+from app.lambda_calculus import add, mul, sub, fact, equal, greater
+from app.lambda_calculus import add_y, fact_y
 
 class TestLambdaCulculus(unittest.TestCase):
 
@@ -55,3 +57,15 @@ class TestLambdaCulculus(unittest.TestCase):
         self.assertEqual(false, iszero(one))
         self.assertEqual(zero, pred(one))
         self.assertEqual(one, pred(two))
+
+    def test_fact(self):
+        self.assertEqual(120, fact(5))
+        self.assertEqual(120, fact_y(5))
+        self.assertEqual(30, add(10)(20))
+        self.assertEqual(30, add_y(10)(20))
+        self.assertEqual(200, mul(10)(20))
+        self.assertEqual(-1, sub(1)(2))
+        self.assertEqual(True, equal(3)(3))
+        self.assertEqual(False, equal(1)(2))
+        self.assertEqual(True, greater(3)(1))
+        self.assertEqual(False, greater(1)(2))
