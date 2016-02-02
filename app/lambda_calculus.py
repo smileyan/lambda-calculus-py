@@ -77,3 +77,31 @@ Y = U(lambda h: lambda F: F(lambda x:U(h)(F)(x)))
 
 fact_y = Y(lambda f: lambda n: 1 if n <= 0 else n*f(n-1))
 add_y  = Y(lambda f: lambda a: lambda b: a if b <= 0 else 1 + f(a)(b-1))
+
+# types
+# 1) construct an object from a value and a type 
+# 2) select the value and type from an object
+# 3) test the type of an object
+# 4) handle type errors
+
+def make_obj(type):
+    return lambda value: lambda s: s(type)(value)
+
+def type(obj):
+    return obj(select_first)
+
+def value(obj):
+    return obj(select_second)
+
+def istype(t):
+    return lambda obj: equal(type(obj))(t)
+
+# Errors
+error_type = one
+
+MAKE_ERROR = make_obj(error_type)
+
+ERROR = MAKE_ERROR(error_type)
+
+def is_error(obj):
+    return istype(error_type)(obj)
