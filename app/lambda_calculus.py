@@ -97,7 +97,7 @@ def istype(t):
     return lambda obj: equal(type(obj))(t)
 
 # Errors
-error_type = one
+error_type = zero
 
 MAKE_ERROR = make_obj(error_type)
 
@@ -105,3 +105,37 @@ ERROR = MAKE_ERROR(error_type)
 
 def is_error(obj):
     return istype(error_type)(obj)
+
+# Boolean
+bool_type = one
+
+MAKE_BOOL = make_obj bool_type # λvalue.λs.(s bool_type value)
+
+TRUE = MAKE_BOOL(true) # λs.(s bool_type true)
+
+FALSE = MAKE_BOOL(false) # λs.(s bool_type false)
+
+isbool = istype bool_type # λobj.(equal (type obj) bool_type)
+
+BOOL_ERROR = MAKE_ERROR bool_type # λs.(s error_type bool_type)
+
+def NOT(X):
+    if isbool(X):
+        MAKE_BOOL(not(value(X)))
+    else:
+        BOOL_ERROR
+
+def AND(X, Y):
+    if and(isbool(X))(isbool(Y)):
+        MAKE_BOOL(and(value(X))(value(Y)))
+    else:
+        BOOL_ERROR
+
+# isbool TRUE ==
+# λobj.(equal (type obj) bool_type) TRUE =>
+# equal (type TRUE) bool_type ==
+# equal (λobj.(obj select_first) TRUE) bool_type ->
+# equal (TRUE select_first) bool_type ==
+# equal (λs.(s bool_type true) select_first) bool_type -> ... ->
+# equal bool_type bool_type
+# true
