@@ -139,3 +139,32 @@ def AND(X, Y):
 # equal (λs.(s bool_type true) select_first) bool_type -> ... ->
 # equal bool_type bool_type
 # true
+
+# Typed conditional expression
+
+def COND(E1, E2, C):
+    if isbool(C):
+        if value(C):
+            return E1
+        else:
+            return E2
+    else:
+        return BOOL_ERROR
+
+def ISERROR(E):
+    return MAKE_BOOL(is_error(E))
+
+def ISBOOL(B):
+    return MAKE_BOOL(isbool(B))
+
+# Numbers and arithmetic
+numb_type = two
+
+MAKE_NUMB = make_obj(numb_type)
+# λvalue.λs.(s numb_type value)
+
+NUMB_ERROR = MAKE_ERROR(numb_type)
+# λs(s error_type numb_type)
+
+isnumb = istype(numb_type)
+# λobj.(equal (type obj) numb_type)
