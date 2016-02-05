@@ -168,3 +168,61 @@ NUMB_ERROR = MAKE_ERROR(numb_type)
 
 isnumb = istype(numb_type)
 # λobj.(equal (type obj) numb_type)
+
+def ISNUMB(N):
+    return MAKE_BOOL(isnumb(N))
+
+_0 = MAKE_NUMB zero
+# λs.(s numb_type zero)
+
+def SUCC(N):
+    if isnumb(N):
+        return MAKE_NUMB(succ(value(N)))
+    else:
+        return NUMB_ERROR
+
+_1 = SUCC _0
+# etc.
+
+def PRED(N):
+    if isnumb(N):
+        if iszero(value(N)):
+            return NUMB_ERROR
+        else:
+            return MAKE_NUMB(value(N))(select_second)
+    else:
+        return NUMB_ERROR
+
+def ISZERO(N):
+    if isnumb(N):
+        return MAKE_BOOL(iszero(value(N)))
+    else:
+        return NUMB_ERROR
+
+def both_numbs(x, y):
+    return and(isnumb(x))(isnumb(y))
+
+def _+(x, y):
+    if both_numbs(x, y):
+        return MAKE_NUMB(add(value(x))(value(y)))
+    else:
+        return NUMB_ERROR
+
+def _*(x, y):
+    if both_numbs(x, y):
+        return MAKE_NUMB(mul(value(x))(value(y)))
+    else:
+        return NUMB_ERROR
+
+def _/(x, y):
+    if both_numbs(x, y):
+        if iszero(value(y)):
+            return NUMB_ERROR
+        else:
+            return MAKE_NUMB(div1(value(x)(value(y))))
+
+def EQUAL(X, Y):
+    if both_numbs(X, Y):
+        return MAKE_BOOL(equal(value(X))(value(Y)))
+    else:
+        return NUMB_ERROR
