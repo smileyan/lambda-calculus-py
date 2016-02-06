@@ -226,3 +226,14 @@ def EQUAL(X, Y):
         return MAKE_BOOL(equal(value(X))(value(Y)))
     else:
         return NUMB_ERROR
+
+char_type = four
+
+CHAR_ERROR = MAKE_ERROR char_type
+
+ischar = istype char_type
+
+def ISCHAR(C):
+    return MAKE_BOOL(ischar(C))
+    
+MAKE_CHAR = make_obj char_type
