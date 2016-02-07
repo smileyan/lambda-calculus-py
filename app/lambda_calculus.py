@@ -237,3 +237,13 @@ def ISCHAR(C):
     return MAKE_BOOL(ischar(C))
     
 MAKE_CHAR = make_obj char_type
+
+_0 = MAKE_CHAR(forty_eight)
+# ...
+_9 = MAKE_CHAR(succ(value(8)))
+_A = MAKE_CHAR(sixty_five)
+# ...
+_Z = MAKE_CHAR(succ(value('Y')))
+_a = MAKE_CHAR(ninety_seven)
+# ...
+_z = MAKE_CHAR(succ(value('y')))
