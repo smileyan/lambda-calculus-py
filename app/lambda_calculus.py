@@ -247,3 +247,41 @@ _Z = MAKE_CHAR(succ(value('Y')))
 _a = MAKE_CHAR(ninety_seven)
 # ...
 _z = MAKE_CHAR(succ(value('y')))
+
+def CHAR_LESS(C1, C2):
+    if ischar(C1) && ischar(C2):
+        return MAKE_BOOL(less(value(C1), value(C2)))
+    else:
+        return CHAR_ERROR
+
+def ORD(C):
+    if ischar(C):
+        return MAKE_NUMB(value(C))
+    else:
+        CHAR_ERROR
+
+def CHAR(N):
+    if isnumb(N):
+        return MAKE_CHAR(value(N))
+    else:
+        return NUMB_ERROR
+
+# ORD 'A' => ... =>
+# MAKE_NUMB (value 'A') ==
+# MAKE_NUMB (value λs.(s char_type sixty_five)) -> ... ->
+# MAKE_NUMB sixty_five
+# λs.(numb_type sixty_five) == 
+# 65
+
+# CHAR 97 => ... =>
+# MAKE_CHAR (value 97) ==
+# MAKE_CHAR (value λs.(s numb_type ninety_seven)) -> ... ->
+# MAKE_CHAR ninety_seven => ... =>
+# λs.(char_type ninety_seven) ==
+# 'a'
+
+def CHAR_EQUAL(C1, C2):
+    if ischar(C1) and ischar(C2):
+        return MAKE_BOOL(equal(value(C1), value(C2)))
+    else:
+        return CHAR_ERROR
