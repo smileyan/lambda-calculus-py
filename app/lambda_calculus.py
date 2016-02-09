@@ -285,3 +285,31 @@ def CHAR_EQUAL(C1, C2):
         return MAKE_BOOL(equal(value(C1), value(C2)))
     else:
         return CHAR_ERROR
+
+
+# List representation
+list_type = three
+def islist():
+    return istype(list_type)
+
+def ISLIST(L):
+    return MAKE_BOOL(islist(L))
+
+def LIST_ERROR():
+    return MAKE_ERROR(list_type)
+
+def MAKE_LIST = make_obj list_type
+
+def CONS(H, T):
+    if islist(T):
+        return MAKE_LIST(lambda s: s(H)(T))
+    else:
+        return LIST_ERROR
+
+# CONS 1 NIL => ... =>
+# MAKE_LIST λs.(s 1 NIL) => ... =>
+# λs.(s list_type
+#          λs.(s 1 NIL))
+
+def NIL():
+    return MAKE_LIST(lambda s: s(LIST_ERROR)(LIST_ERROR))
