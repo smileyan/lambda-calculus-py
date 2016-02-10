@@ -313,3 +313,29 @@ def CONS(H, T):
 
 def NIL():
     return MAKE_LIST(lambda s: s(LIST_ERROR)(LIST_ERROR))
+
+# λs.(s list_type
+#         λs.(s LIST_ERROR LIST_ERROR))
+def HEAD(L):
+    if islist(L):
+        return value(L)(select_first)
+    else:
+        return LIST_ERROR
+
+def TAIL(L):
+    if islist(L):
+        return value(L)(select_second)
+    else:
+        LIST_ERROR
+
+def LENGTH(L):
+    if isnil(L):
+        return 0
+    else:
+        return SUCC(LENGTH(TAIL L))
+
+def APPEND(L1, L2):
+    if isnil(L1):
+        return L2
+    else:
+        return CONS(HEAD(L1), APPEND(TAIL(L1), L2))
