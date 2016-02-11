@@ -339,3 +339,38 @@ def APPEND(L1, L2):
         return L2
     else:
         return CONS(HEAD(L1), APPEND(TAIL(L1), L2))
+
+# DELETE X [] = []
+# DELETE X (H::T) = T if <equal> X H
+# DELETE X (H::T) = H::(DELETE X T) if NOT (<equal> X H)
+
+def DELETE(V, L):
+    if isnil(L):
+        return NIL
+    else:
+        if equal(v, HEAD(L)):
+            return TAIL(L)
+        else:
+            return CONS(HEAD(L), DELETE(V, TAIL(L)))
+
+# LIST_EQUAL [] [] = TRUE
+# LIST_EQUAL [] (H::T) = FALSE
+
+# LIST_EQUAL (H1::T1) (H2::T2) = LIST_EQUAL T1 T2
+#                                if <equal> H1 H2
+# LIST_EQUAL (H1::T1) (H2::T2) = FALSE
+#                                if NOT (<equal> H1 H2)
+
+def LIST_EQUAL(L1, L2):
+    if isnil(L1) and isnil(L2):
+        return TRUE
+    else:
+        if isnil(L1) or isnil(L2):
+            return FALSE
+        else:
+            if EQUAL(HEAD(L1), HEAD(L2)):
+                return LIST_EQUAL(TAIL(L1), TAIL(L2))
+            else:
+                return FALSE
+
+
