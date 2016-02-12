@@ -373,4 +373,58 @@ def LIST_EQUAL(L1, L2):
             else:
                 return FALSE
 
+# Strings: linear lists of characters.
+
+# ISSTRING [] = TURE
+# ISSTRING (H::T) = (ISCHAR H) AND (ISSTRING T)
+
+# rec ISSTRING S =
+#   IF ISNIL S
+#   THEN TRUE
+#   ELSE AND (ISCHAR (HEAD S)) (ISSTRING (TAIL S))
+
+# String comparison
+
+# STRING_EQUAL "" "" = TRUE
+# STRING_EQUAL "" (C::S) = FALSE
+# STRING_EQUAL (C::S) "" = FALSE
+
+# STRING_EQUAL (C1::S1) (C2::S2) = STRING_EQUAL S1 S2
+#                                  if CHAR_EQUAL C1 C2
+
+# STRING_EQUAL (C1::S1) (C2::S2) = FALSE
+#                                  if NOT (CHAR_EQUAL C1 C2)
+
+# rec STRING_EQUAL S1 S2 =
+#   IF (ISNIL S1) AND (ISNIL S2)
+#   THEN TRUE
+#   ELSE
+#     IF (ISNIL S1) OR (ISNIL S2)
+#     THEN FALSE
+#     ELSE
+#       IF CHAR_EQUAL (HEAD S1) (HEAD S2)
+#       THEN STRING_EQUAL (TAIL S1) (TAIL S2)
+#       ELSE FALSE
+
+# STRING_LESS "" (C::S) = TRUE
+# STRING_LESS (C::S) "" = FALSE
+
+# STRING_LESS (C1::S1) (C2::S2) = TRUE
+#                                 if CHAR_LESS C1 C2
+
+# STRING_LESS (C1::S1) (C2::S2) = (CHAR_EQUAL C1 C2) AND
+#                                 (STRING_LESS S1 S2)
+#                                 if NOT (CHAR_LESS C1 C2)
+
+# rec STRING_LESS S1 S2 =
+#   IF ISNIL S1
+#   THEN NOT (ISNIL S2)
+#   ELSE
+#     IF ISNIL S2
+#     THEN FALSE
+#     ELSE
+#       IF CHAR_LESS (HEAD S1) (HEAD S2)
+#       THEN TRUE
+#       ELSE (CHAR_EQUAL (HEAD S1) (HEAD S2)) AND
+#            (STRING_LESS (TAIL S1) (TAIL S2))
 
