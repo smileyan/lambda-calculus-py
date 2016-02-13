@@ -428,3 +428,42 @@ def LIST_EQUAL(L1, L2):
 #       ELSE (CHAR_EQUAL (HEAD S1) (HEAD S2)) AND
 #            (STRING_LESS (TAIL S1) (TAIL S2))
 
+# Numeric string to number converion
+
+# value '0' => ... =>
+# forty_eight
+
+# sub (value '0') (value '0') -> ... ->
+# sub forty_eight forty_eight => ... ->
+# zero
+
+# value '1' => ... =>
+# forty_nine
+
+# sub (value '1') (value '0') -> ... ->
+# sub forty_nine forty_eight => ... =>
+# one
+
+# def digit_value d = sub (value d) (value '0')
+
+# STRING_VAL V "" = V
+# STRING_VAL V D::T = STRING_VAL 10*V + (digit_value D) T
+
+# STRING_VAL 0 "321" ==
+# STRING_VAL 0 ('3'::"21") -> ... ->
+# STRING_VAL 10*0 + (digit_value '3') "21" -> ... ->
+# STRING_VAL 3 "21" ==
+# STRING_VAL 3 ('2'::"1") -> ... ->
+# STRING_VAL 10*3 + (digit_value '2') "1" -> ... ->
+# STRING_VAL 32 "1" == 
+# STRING_VAL 32 ('1'::"") -> ... ->
+# ...
+# 321
+
+# rec string_val v L =
+#   IF ISNIL L
+#   THEN v
+#   ELSE string_val (add (mult v ten) (digit_value (HEAD L)))
+#                   (TAIL L)
+
+# def STRING_VAL S = MAKE_NUMB (string_val zero S)
