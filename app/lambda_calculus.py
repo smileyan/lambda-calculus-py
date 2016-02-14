@@ -467,3 +467,37 @@ def LIST_EQUAL(L1, L2):
 #                   (TAIL L)
 
 # def STRING_VAL S = MAKE_NUMB (string_val zero S)
+
+rec <name> <bound variable> = 
+  IF ISNIL <bound variable>
+  THEN <expression1>
+  ELSE <expression2> using (HEAD <bound variable>)
+                     and   (TAIL <bound variable>)
+
+rec <name> [] = <expression1>
+ or <name> (<head>::<tail>) = <expression2 using <head>
+                                             and <tail>>
+
+LENGTH [] = 0
+LENGTH (H::T) = SUCC (LENGTH T)
+
+rec LENGTH L =
+  IF ISNIL L
+  THEN 0
+  ELSE SUCC (LENGTH (TAIL L))
+
+rec LENGTH [] = 0
+ or LENGTH (H::T) = SUCC (LENGTH T)
+
+FLAT [] = []
+FLAT (H::T) = H::(FLAT T) if NOT (ISLIST H)
+FLAT (H::T) = APPEND (FLAT H) (FLAT T) if (ISLIST H)
+
+rec FLAT L =
+ IF ISNIL L 
+ THEN []
+ ELSE
+   IF NOT (ISLIST (HEAD L))
+   THEN (HEAD L)::(FLAT (TAIL L))
+   ELSE APPEND (FLAT (HEAH H)) (FLAT (TAIL L))
+
