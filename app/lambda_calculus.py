@@ -501,3 +501,33 @@ rec FLAT L =
    THEN (HEAD L)::(FLAT (TAIL L))
    ELSE APPEND (FLAT (HEAH H)) (FLAT (TAIL L))
 
+# Ordered linear lists, insertion and sorting
+
+ORDERED [] = TRUE
+
+ORDERED [C] = TRUE
+
+ORDERED (C1::C2::L) = (<less> C1 C2) AND (ORDERED (CONS C2 L))
+
+INSERT X [] = [X]
+INSERT X (H::T) = X::H::T
+                  if <less> X H
+
+INSERT X (H::T) = H::(INSERT X T)
+                  if NOT <less> X H
+
+rec INSERT S [] = [S]
+ or INSERT S (H::T) =
+  IF STRING_LESS S H
+   THEN S::H::T
+   ELSE H::(INSERT H T)
+
+SORT [] = []
+SORT (H::T) = INSERT H (SORT T)
+
+rec SORT [] = []
+ or SORT (H::T) = INSERT H (SORT T)
+ 
+
+
+
