@@ -528,6 +528,30 @@ SORT (H::T) = INSERT H (SORT T)
 rec SORT [] = []
  or SORT (H::T) = INSERT H (SORT T)
  
+rec IFIND N [] = []
+ or IFIND 0 (H::T) = H
+ or IFIND (SUCC N) (H::T) = IFIND N T
+
+rec IDELETE N [] = []
+ or IDELETE 0 (H::T) = H
+ or IDELETE (SUCC N) (H::T) = H::(IDELETE N T)
+
+rec IBEFORE N E [] = []
+ or IBEFORE 0 E L = E::L
+ or IBEFORE (SUCC N) E (H::T)) = H::(IBEFORE N E T)
+
+rec IREPLACE N E [] = []
+ or IREPLACE 0 E (H::T) = E::T
+ or IREPLACE (SUCC N) E (H::T) = H::(IREPLACE N E T)
+
+rec DOUBLE [] = []
+ or DOUBLE (H::T) = (2*H)::(DOUBLE T)
+
+rec PLURAL [] = []
+ or PLURAL (H::T) = (APPEND H 's')::(PLURAL T)
+
+rec MAPCAR FUNC [] = []
+ or MAPCAR FUNC (H::T) = (FUNC H)::(MAPCAR FUNC T)
 
 
 
