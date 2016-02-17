@@ -553,5 +553,12 @@ rec PLURAL [] = []
 rec MAPCAR FUNC [] = []
  or MAPCAR FUNC (H::T) = (FUNC H)::(MAPCAR FUNC T)
 
+rec MAPCARS FUNC [] [] = []
+ or MAPCARS FUNC (H1::T1) (H2::T2) = (FUNC H1 H2)::(MAPCARS FUNC T1 T2)
 
+def COMP = MAPCARS λX.λY.(STRING_EQUAL X Y)
+def SUMS = MAPCARS λX.λY.(X + Y)
 
+COMPOSITE VALUES AND TREES
+
+Composite values
