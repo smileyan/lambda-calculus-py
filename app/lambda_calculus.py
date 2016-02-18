@@ -562,3 +562,21 @@ def SUMS = MAPCARS λX.λY.(X + Y)
 COMPOSITE VALUES AND TREES
 
 Composite values
+
+rec NFIND S [] = []
+ or NFIND S (H::T) =
+  IF STRING_EQUAL S (HEAD (TAIL H))
+  THEN HEAD H
+  ELSE NFIND S T
+
+rec SCHECK [] = []
+ or SCHECK (H::T) =
+  IF LESS (HEAD (TAIL H)) (HEAD (TAIL (TAIL H)))
+  THEN H::(SCHECK T)
+  ELSE SCHECK T
+
+rec DCHANGE S N [] = []
+ or DCHANGE S N (H::T) =
+ IF STRING_EQUAL S (HEAD (TAIL (HEAD H)))
+ THEN [(HEAD H), (HEAD TAIL H), N]::T
+ ELSE H::(DCHANGE S N T)
