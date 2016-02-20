@@ -613,3 +613,25 @@ rec DINSERT E [] = [E]
  IF STRING_EQUAL (ESURNAME E) (ESURNAME H)
  THEN E::H::T
  ELSE H::(DINSERT E T)
+ 
+ def FORENAME [F,S] = F
+ def SURNAME [F,S] = S
+ 
+ [F,S] = F::S::NIL
+ [<forename>,<surname>] == <forename>::<surname>::NIL
+ F == <forename>
+ S == <surname>
+ ([F,S]::T)
+ 
+ rec NCOUNT N [] = 0
+  or NCOUNT N ([F,S]::T) = 
+   IF EQUAL N F
+   THEN 1 + (NCOUNT N T)
+   ELSE (NCOUNT N T)
+
+def ITEM [I,S,R] = I
+def STOCK [I,S,R] = S
+def REORDER [I,S,R] = R
+[I,S,R] == I::S::R::NIL
+[<item name>,<stock level>,<reorder level>] ==
+ <item name>::<stock level>::<reorder level>::NIL
