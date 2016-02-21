@@ -635,3 +635,21 @@ def REORDER [I,S,R] = R
 [I,S,R] == I::S::R::NIL
 [<item name>,<stock level>,<reorder level>] ==
  <item name>::<stock level>::<reorder level>::NIL
+
+I == <item name>
+S == <stock level>
+R == <reorder level>
+
+([I,S,R]::T)
+
+rec REORD [] = []
+ or REORD ([I,S,R]::T) =
+ IF LESS S R
+ THEN [I,S,T]::(REORD T)
+ ELSE REORD T
+
+def ENAME [N,A,P] = N
+def EFORENAME [[F,S],A,P] = F
+def ESURNAME [[F,S],A,P] = S
+def ADDRESS [N,A,P] = A
+def PHONE [N,A,P] = P
