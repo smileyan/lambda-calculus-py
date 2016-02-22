@@ -653,3 +653,43 @@ def EFORENAME [[F,S],A,P] = F
 def ESURNAME [[F,S],A,P] = S
 def ADDRESS [N,A,P] = A
 def PHONE [N,A,P] = P
+
+[N,A,P] == N::A::P::NIL
+
+[<name>,<address>,<number>] == <name>::<address>::<number>::NIL
+
+N == <name>
+A == <address>
+P == <number>
+
+[[F,S],A,P] == (F::S::NIL)::A::P::NIL
+
+[[<forename>,<surname>],<address>,<number>] == (<forename>::<surname>::NIL)::<address>::<number>::NIL
+
+F == <forename>
+S == <surname>
+[N,A,P]::T
+
+rec DINSERT R [] = [R]
+ or DINSERT [N1,A1,P1] ([N2,A2,P2]::T) =
+  IF LESS P1 P2
+  THEN [N1,A1,P1]::[N2,A2,P2]::T
+  ELSE [N2,A2,P2]::(DINSERT [N1,A1,P1] T)
+
+rec DSORT [] = []
+ or DSORT (H::T) = DINSERT H (DSORT T)
+ 
+Local definitions
+
+λ<name>.<body> <argument
+
+let <name> = <argument>
+in <body>
+
+<body>
+where <name> = <argument>
+
+rec SPLIT [] = []::[]
+ or SPLIT ([F,S]::L) =
+  let (FLIST::SLIST) = SPLIT L
+  in ((F::FLIST))::(S::SLIST)
