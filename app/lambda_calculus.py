@@ -693,3 +693,50 @@ rec SPLIT [] = []::[]
  or SPLIT ([F,S]::L) =
   let (FLIST::SLIST) = SPLIT L
   in ((F::FLIST))::(S::SLIST)
+
+Tree
+
+nodes, branches sub-trees root leaf N-ary
+
+binary left right
+
+EMPTY is a binary trees
+
+NODE ITEM L R is a binary tree 
+if L is a binary tree and R is a binary tree
+
+def EMPTY = NIL
+def ISEMPTY = ISNIL
+
+def NODE ITEM L R = [ITEM,L,R]
+
+ITEM (NODE I L R) = I
+LEFT (NODE I L R) = L
+RIGHT (NODE I L R) = R
+
+ITEM EMPTY = TREE_ERROR
+LEFT EMPTY = TREE_ERROR
+RIGHT EMPTY = TREE_ERROR
+
+def TREE_ERROR = LIST_ERROR
+def ITEM EMPTY = TREE_ERROR
+ or ITEM [I,L,R] = I
+def LEFT EMPTY = TREE_ERROR
+ or LEFT [I,L,R] = L
+def RIGHT EMPTY = TREE_ERROR
+ or RIGHT [I,L,R] = R
+
+TADD I EMPTY = NODE I EMPTY EMPTY
+TADD I (NODE NI L R) = NODE NI (TADD I L) R
+                       if <less> I NI
+TADD I (NODE NI L R) = NODE NI L (TADD I L)
+                       if NOT (<less> I NI)
+
+rec TADD I EMPTY = NODE I EMPTY EMPTY
+ or TADD I [NI,L,R] =
+ IF LESS I NI
+ THEN NODE NI (TADD I L) R
+ ELSE NODE NI L (TADD I R)
+
+rec TADDLIST [] TREE = TREE
+ or TADDLIST (H::T) TREE = TADDLIST T (TADD H TREE)
