@@ -784,3 +784,26 @@ rec CTFIND S EMPTY = ""
    IF STRING_LESS S NS
    THEN CTFIND S L
    ELSE CTFIND S R
+
+Curried and uncurried functions
+
+def curry f x y = f [x,y]
+
+def SUM_SQ1 [X,Y] = (X*X)+(Y*Y)
+
+def curry_SUM_SQ = curry SUM_SQ1
+
+λf.λx.λy.(f [x,y]) SUM_SQ1 =>
+λx.λy.(SUM_SQ1 [x,y])
+
+def curry_SUM_SQ x y= SUM_SQ1 [x,y]
+
+def uncurry g [a,b] = g a b
+
+def SUM_SQ2 X Y = (X*X)+(Y*Y)
+
+def uncurry_SUM_SQ = uncurry SUM_SQ2
+
+λg.λa.λb.(g a b) SUM_SQ2 =>
+λ[a,b].(SUM_SQ2 a b)
+
