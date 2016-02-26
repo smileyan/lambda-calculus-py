@@ -37,3 +37,49 @@ a ∈ B ⇒ a ≡ a
 a relation R is reflexive iff aRa (for any a)
 a relation R is symmetric iff aRb ⇒ bRa
 a relation R is transitive iff aRb and bRc ⇒ aRc
+
+If a relation is reflexive, symmetric, and transitive, then it is an equivalence.
+
+neither reflexive, symmetric, nor transitive:
+(f.B1) r B1 [a]
+(t.B1) r t  [b]
+
+t ::=                                        terms:
+      true                            constant true
+      false                          constant false
+      if t then t else t                conditional
+      0                               constant zero
+      succ t                              successor
+      pred t                            predecessor
+      iszero t                            zero test
+
+   if false then 0 else 1;
+-> 1
+
+   iszero (pred (succ 0));
+-> true
+
+Syntax
+
+[TERMS, INDUCTIVELY]: The set of terms is the smallest set T 
+such than
+1. {true, false, 0} ⊆ T;
+2. if t1 ∈ T, then {succ t1, pred t1, iszero t1} ⊆ T;
+3. if t1 ∈ T, t1 ∈ T, and t1 ∈ T, then if t1 then t2 else t3 ∈ T.              □
+
+[TERMS, BY INFERENCE RULES]: The set of terms is defined by the 
+following rules:
+         true ∈ T        false ∈ T        0 ∈ T
+       t1 ∈ T           t1 ∈ T             t1 ∈ T
+   -------------     -------------     --------------
+   succ t1 ∈ T        pred t1 ∈ T       iszero t1 ∈ T
+               t1 ∈ T  t2 ∈ T  t3 ∈ T
+             -------------------------
+             if t1 then t2 else t3 ∈ T                                         □
+
+[TERMS, CONCRETELY]: For each natural number i, define a set Si
+as follows:
+     S0   = ∅
+     Si+1 =    {true, false, 0}
+            ∪  {succ t1, pred t1, iszero t1 | t1 ∈ Si}
+            ∪  {if t1 then t2 else t3 | t,t2,t3 ∈ Si}.                         □

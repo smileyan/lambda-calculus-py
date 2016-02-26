@@ -807,3 +807,25 @@ def uncurry_SUM_SQ = uncurry SUM_SQ2
 λg.λa.λb.(g a b) SUM_SQ2 =>
 λ[a,b].(SUM_SQ2 a b)
 
+Evaluation
+
+Introduction
+
+applicative and normal order evaluation
+
+halting problem
+
+Church-Rosser theorems
+
+lazy evaluation
+
+Termination and normal form
+
+λx.x λa.(a a) and λf.λa(f a) λs.(s s)
+
+λx.x λa.(a a) =>
+λa.(a a)
+
+λf.λa(f a) λs.(s s) =>
+λa.(λs.(s s) a) =>
+λa.(a a)
