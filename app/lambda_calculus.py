@@ -829,3 +829,7 @@ Termination and normal form
 λf.λa(f a) λs.(s s) =>
 λa.(λs.(s s) a) =>
 λa.(a a)
+
+Normal order
+
+Applicative order

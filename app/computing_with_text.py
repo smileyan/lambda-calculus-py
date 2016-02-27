@@ -44,6 +44,34 @@ neither reflexive, symmetric, nor transitive:
 (f.B1) r B1 [a]
 (t.B1) r t  [b]
 
+Ordered Sets
+
+1. reflexive symmetric transitive                                              □
+
+Sequences
+
+Induction
+
+1. Axiom[principle of ordinar induction on natural numbers]:
+    if P(0)
+    and, for all i, P(i) implies P(i+1),
+    then P(n) holds for all n.                                                 □
+
+2. Axiom[principle of complete induction on natural number]:
+    if, for each natural number n,
+        given P(i) for i < n,
+        we can show P(n),
+    then P(n) holds for all n.                                                 □
+
+3. dictionary order on pairs of natural numbers is defined as follows :
+   (m, n) ≤ (m', n') iff either m < m' or else m = m' and n ≤ n'.              □
+
+4. Aiom[principle of lexicographic induction]:
+    if, for each pair (m, n) of natural numbers,
+        given P(m', n') for all (m', n') < (m, n)
+    then P(m, n) holds for all m, n.                                           □
+
+
 t ::=                                        terms:
       true                            constant true
       false                          constant false
