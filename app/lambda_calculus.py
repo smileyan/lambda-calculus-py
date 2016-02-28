@@ -833,3 +833,14 @@ Termination and normal form
 Normal order
 
 Applicative order
+
+Consistent applicative order use
+
+Delaying evaluation
+
+Evaluation termination, the halting problem, evaluation equivalance and the Church-Rosser theorems
+
+Normal and applicative are interchangeable but normal order gives a better guarantee of evaluation termination
+
+1. Every expression has a unique normal form.
+2. If an expression has a normal form then it may be reached by normal order evaluation.
