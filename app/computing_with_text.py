@@ -48,6 +48,24 @@ Ordered Sets
 
 1. reflexive symmetric transitive                                              □
 
+2. A reflexive and transitive relation R on a set S is called a preorder on S  
+   Preorders are usually written using symbols ≤. We write s < t 
+   ("s is trictly less than t") to mean s ≤ t ∧ s ≠ t.
+   A preorder (on a set S) that is also antisymmetric is called a partial order
+   on S. A partial order ≤ is called a total order if it also has the property
+   that, for each s and t in S, either s ≤ t or t ≤ s.                         □
+
+3. Suppose that ≤ is a partial order on a set S and s and t are elements of S.
+   An element j ∈ S is said to be a join (or least upper bound) of s and t if
+   1. s ≤ j and t ≤ j, and
+   2. for any element k ∈ S with s ≤ k and t ≤ k, we have j ≤ k.
+   An element m ∈ S is said to be a meet (or greatest lower bound) of s and t if
+   1. m ≤ s and m ≤ t, and
+   2. for any element n ∈ S with n ≤ s and n ≤ t, we have n ≤ m.               □
+
+4. A reflexive, transitive, and symmetric relation on s set S is called
+   an equivalence on S.                                                        □
+
 Sequences
 
 Induction
@@ -70,44 +88,3 @@ Induction
     if, for each pair (m, n) of natural numbers,
         given P(m', n') for all (m', n') < (m, n)
     then P(m, n) holds for all m, n.                                           □
-
-
-t ::=                                        terms:
-      true                            constant true
-      false                          constant false
-      if t then t else t                conditional
-      0                               constant zero
-      succ t                              successor
-      pred t                            predecessor
-      iszero t                            zero test
-
-   if false then 0 else 1;
--> 1
-
-   iszero (pred (succ 0));
--> true
-
-Syntax
-
-[TERMS, INDUCTIVELY]: The set of terms is the smallest set T 
-such than
-1. {true, false, 0} ⊆ T;
-2. if t1 ∈ T, then {succ t1, pred t1, iszero t1} ⊆ T;
-3. if t1 ∈ T, t1 ∈ T, and t1 ∈ T, then if t1 then t2 else t3 ∈ T.              □
-
-[TERMS, BY INFERENCE RULES]: The set of terms is defined by the 
-following rules:
-         true ∈ T        false ∈ T        0 ∈ T
-       t1 ∈ T           t1 ∈ T             t1 ∈ T
-   -------------     -------------     --------------
-   succ t1 ∈ T        pred t1 ∈ T       iszero t1 ∈ T
-               t1 ∈ T  t2 ∈ T  t3 ∈ T
-             -------------------------
-             if t1 then t2 else t3 ∈ T                                         □
-
-[TERMS, CONCRETELY]: For each natural number i, define a set Si
-as follows:
-     S0   = ∅
-     Si+1 =    {true, false, 0}
-            ∪  {succ t1, pred t1, iszero t1 | t1 ∈ Si}
-            ∪  {if t1 then t2 else t3 | t,t2,t3 ∈ Si}.                         □

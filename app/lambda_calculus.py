@@ -844,3 +844,25 @@ Normal and applicative are interchangeable but normal order gives a better guara
 
 1. Every expression has a unique normal form.
 2. If an expression has a normal form then it may be reached by normal order evaluation.
+
+Infinite objects
+
+def cons h t s = s h t
+def head l = l λx.λy.x
+def tail l = l λx.λy.y
+
+rec numblist n = cons n (numblist (succ n))
+def numbers = numblist zero
+
+numblist zero => ... =>
+cons zero (numblist (succ zero)) => ... =>
+λs.(s zero (numblist (succ zero)))
+
+head numbers => ... =>
+λs.(s zero (numblist (succ zero))) λx.λy.x => ... =>
+zero
+
+tail numbers => ... =>
+λs.(s zero (numblist (succ zero))) λx.λy.y => ... =>
+numblist (succ zero) => ... =>
+λs.(s (succ zero) (numblist (succ (succ zero))))
