@@ -61,7 +61,26 @@ as follows:
       size(iszero t1)                 = size(t1) + 1
       size(if t1 then t2 else t3)     = size(t1) + size(t2) + size(t3)
       That is, the size of t is the number of nodes in its abstract syntax tree.
+      
+      The depth of a term t, written depth(t), is defined as follows:
+      depth(true)                     = 1
+      depth(false)                    = 1
+      depth(0)                        = 1
+      depth(succ t1)                  = depth(t1) + 1
+      depth(pred t1)                  = depth(t1) + 1
+      depth(iszero t1)                = depth(t1) + 1
+      depth(if t1 then t2 else t3)    = max(depth(t1),depth(t2),depth(t3)) + 1
+      depth(t) is smallest i such that t ∈ Si according to Definition 3.2.3
 
+3.3.3 LEMMA: The number of distinct constants in a term t is no greater than the
+      size of t (i.e., |Consts(t| ≤ size(t)).                                  □
+
+
+3.5
+
+3.5.1 DEFINITION: An instance of an inference rule is obtained by consistently re-
+      placing each metavariable by the same term in the rule's conclusion and all
+      its premises(if any)                                                     □
 |---------------------------------------------------------------------------------|
   Syntax                                | Evaluation                    t --> t'
   t  ::=                       terms:   |  

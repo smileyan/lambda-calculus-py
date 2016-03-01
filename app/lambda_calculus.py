@@ -866,3 +866,46 @@ tail numbers => ... =>
 λs.(s zero (numblist (succ zero))) λx.λy.y => ... =>
 numblist (succ zero) => ... =>
 λs.(s (succ zero) (numblist (succ (succ zero))))
+
+Lazy evaluation: is a method of delaying expression evaluation which avoids multiple
+evaluation of the same expression. Lazy evaluation is also known as call by need.
+
+(λs.(s s)1 (λx.x λy.y)2)3
+
+FUNCTIONAL PROGRAMMING IN STANDARD ML
+
+Introduction
+
+- <expression>;
+> <result>
+
+Types: types are central to SML. Every object and construct is typed.
+
+Standard types: boolean, integers, strings, lists, tuples.
+
+<value> : <type>
+fn : <type>
+
+Basic types - booleans, integers and strings
+
+The type expression for a basic type is the type's identify.
+The boolean type has identifier:
+           bool
+and values:
+          true false
+- true;
+> true : bool
+
+The integer type has identifier:
+          int 
+- 42;
+> 42 : int
+- ~84
+> ~84 : int
+
+The string type has identifier:
+        string
+- "Is this a string?";
+> "Is this a string?" : string
+
+
