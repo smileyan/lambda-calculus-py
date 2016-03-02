@@ -78,9 +78,6 @@ as follows:
 
 3.5
 
-3.5.1 DEFINITION: An instance of an inference rule is obtained by consistently re-
-      placing each metavariable by the same term in the rule's conclusion and all
-      its premises(if any)                                                     □
 |---------------------------------------------------------------------------------|
   Syntax                                | Evaluation                    t --> t'
   t  ::=                       terms:   |  
@@ -91,3 +88,35 @@ as follows:
          true               true value  |         if t1 then t2 else t3 -->
          false             false value  |        if t1' then t2 else t3
 |----------------------------------------------------------------------------------|
+
+3.5.1 DEFINITION: An instance of an inference rule is obtained by consistently re-
+      placing each metavariable by the same term in the rule's conclusion and all
+      its premises(if any)                                                     □
+
+3.5.2 DEFINITION: A rule is satisfied by a relation if, for each instance of the rule,
+      either the conclusion is in the relation or one of the premises is not.  □
+
+3.5.3 DEFINITION: The one-step evaluation relation -> is the smallest binary rela-
+      tion on terms satisfying the three rules in Figure 3-1. When the pair (t,t') is
+      in the evaluation relation, we say that "the evaluation statement (or judgment)
+      t -> t' is derivable."                                                   □
+
+3.5.4 THEOREM [DEFINITION OF ONE-STEP EVALUATION]: If t -> t' and t -> t'',
+      then t' = t''                                                            □
+
+3.5.6 DEFINITION: A term t is in nomal form if no evaluation rule applies to it-
+      i.e., if there is no t' such that t -> t'.(We sometimes say "t is a normal"
+      as shorthand for "t is a term in normal form.")                          □
+
+3.5.7 THEOREM: Every value is in normal form.                                  □
+
+3.5.8 THEOREM: If t is in normal form, then t is a value.                      □
+
+3.5.9 DEFINITION: The multi-step evaluation relation ->* is the reflexive, transitive
+      closure of one-step evaluation. That is, it is the smallest relation sun that (1)
+      if t -> t' then t ->* t', (2) t ->* t for all t, and (3) if t ->* t' and t' ->* t'',
+      then t ->* t''                                                           □
+
+3.5.11 THEOREM[UNIQUENESS OF NORMAL FORMS]: If t ->* u and t ->* u', where u
+       and u' are both normal forms, then u = u'.                              □
+# ⇓

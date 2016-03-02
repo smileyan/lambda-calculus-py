@@ -10,6 +10,27 @@
     #     <function expression> ::= <expression>
     #     <argument expression> ::= <expression> 
 
+1B Term-structure and subsitution
+
+Definition 1.6 The length of a term M (called lgh(M)) is the total
+number of occurrences of atoms in M. In more detail, define
+
+  (a) lgh(a)    = 1                 for atoms a;
+  (b) lgh(MN)   = lgh(M) + lgh(N);
+  (c) lgh(λx.M) = 1 + lgh(M).
+
+Definition 1.12 (Substitution) For any M,N,x define [N/x]M to 
+be the result of subsituting N for every free occurrence of x in M, and
+changing bound variables to avoid clashes.
+  (a) [N/x]x      ≡ N;
+  (b) [N/x]a      ≡ a               for all atoms a ≠ x;
+  (c) [N/x](PQ)   ≡ ([N/x]P [N/x]Q);
+  (d) [N/x](λx.P) ≡ λx.P;
+  (e) [N/x](λy.P) ≡ λy.P            if x ∉ FV(P);
+  (f) [N/x](λy.P) ≡ λy.[N/x]p       if x ∈ FV(P) and y ∉ FV(N);
+  (g) [N/x](λy.P) ≡ λz.[N/x][z/y]P  if x ∈ FV(P) and y = FV(N).
+
+
 identify = lambda x: x
 
 def self_apply():
@@ -908,4 +929,51 @@ The string type has identifier:
 - "Is this a string?";
 > "Is this a string?" : string
 
+List
 
+empty list 
+[]
+
+The type expression for a list depends on the element type:
+
+<element type> list
+
+- [1,4,9,16];
+> [1,4,9,16] : int list
+
+- [[1,2],[3,4]]
+> [[1,2],[3,4]] : (int list) list
+
+Tuples
+
+("ui",1,2)
+
+A tuple's type is represented by its element's types separated by *s:
+<element1 type> * <element2 type> * ...
+
+- ("aa",1)
+> ("aa",1) : string * int
+
+Function types and expressions
+
+fn : <domain type> -> <range type>
+
+<function expression> <argument expression>
+
+Boolean standard functions
+
+- not true;
+> false : bool
+
+- not;
+> fn : bool -> bool
+
+- true orelse false;
+> true : bool
+
+- true andalso false;
+> fasle: bool
+
+fn : (bool * bool) -> bool
+
+Numeric standard functions and operator overloading
