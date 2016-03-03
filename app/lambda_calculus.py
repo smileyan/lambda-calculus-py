@@ -30,6 +30,15 @@ changing bound variables to avoid clashes.
   (f) [N/x](λy.P) ≡ λy.[N/x]p       if x ∈ FV(P) and y ∉ FV(N);
   (g) [N/x](λy.P) ≡ λz.[N/x][z/y]P  if x ∈ FV(P) and y = FV(N).
 
+Lemma 1.15 For all terms M, N and variables x:
+  (a) [x/x]M ≡ M;
+  (b) x ∉ FV(M) ->
+
+Definition 1.24 (-reducing) Any term of form
+         (λx.M)N
+is called a -redex and the corresponding term
+         [N/x]M
+is called its contractum
 
 identify = lambda x: x
 
@@ -977,3 +986,20 @@ Boolean standard functions
 fn : (bool * bool) -> bool
 
 Numeric standard functions and operator overloading
+
+- op div;
+> fn : (int*int) -> int
+
+String standard functions
+
+- op ^;
+> fn : (string * string) -> string
+
+- "Happy"^" birthday!";
+> "Happy birthday!" : string
+
+- size;
+> fn : string -> int
+
+- size "hello";
+> 5 : int
