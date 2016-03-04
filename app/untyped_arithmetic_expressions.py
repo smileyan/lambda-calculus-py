@@ -119,4 +119,28 @@ as follows:
 
 3.5.11 THEOREM[UNIQUENESS OF NORMAL FORMS]: If t ->* u and t ->* u', where u
        and u' are both normal forms, then u = u'.                              □
-# ⇓
+
+3.5.12 THEOREM[TERMINATION OF EVALUATION]: For every term t there is some 
+       normal form t' such that t ->* t'.
+
+|-------------------------------------------------------------------------------------|
+  New Syntactic forms                   | New Evaluation rules                t --> t'
+  t  ::=  ...                  terms:   |      t1 -> t1'
+           0              constant true |  -----------------                  (E-SUCC)
+          succ t          successor     |   succ t1 -> succ t1'
+          pred t          predecessor   |      pred 0 --> 0               (E-PREDZERO)
+                                        |      t1 -> t1'
+  v  ::= ...                   values:  |  ------------------                 (E-PRED)
+         nv             numeric value   |  pred t1 -> pred t1'
+                                        |    iszero 0 --> true          (E-ISZEROZERO)
+                                        |    iszero(succ nv1) -> false  (E-ISZEROSUCC)
+  nv ::=               numeric values:  |      t1 -> t1'
+          0               zero value    |  ----------------------           (E-ISZERO)
+          succ nv      successor value  |  iszero t1 -> iszero t1'
+|-------------------------------------------------------------------------------------|
+
+3.5.15 DEFINITION: A closed term is stuck if it is in normal form but not a value.
+
+3.5.17 big-step semantics, directly formulates the notion of "this term evaluates to that final value"
+                v ⇓ v                (B-VALUE)
+          t1 ⇓ true t2 ⇓ v2

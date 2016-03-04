@@ -40,6 +40,21 @@ is called a -redex and the corresponding term
          [N/x]M
 is called its contractum
 
+Definition 1.26 A term Q which contains no β-redexed is called a 
+β-normal form (or a term is β-normal form or just a β-nf)
+
+2A Introduction to CL
+A(x,y) = x + y (for all x,y)
+(C(f))(x,y) = f(y,x)
+A = C(A)
+
+B, which composes two functions: (B(f,g))(x) = f(g(x));
+B`, a reversed composition operator: (B`(f,g))(x) = g(f(x));
+I, the identify operator: I(f) = f;
+K, which forms constant functions: (K(a))(x) = a;
+S, a stronger composition operator: (S(f,g))(x) = f(x,g(x));
+W, for doubling or 'diagonalizing': (W(f))(x) = f(x,x).
+
 identify = lambda x: x
 
 def self_apply():
@@ -963,13 +978,13 @@ A tuple's type is represented by its element's types separated by *s:
 - ("aa",1)
 > ("aa",1) : string * int
 
-Function types and expressions
+6. Function types and expressions
 
 fn : <domain type> -> <range type>
 
 <function expression> <argument expression>
 
-Boolean standard functions
+7. Boolean standard functions
 
 - not true;
 > false : bool
@@ -985,12 +1000,12 @@ Boolean standard functions
 
 fn : (bool * bool) -> bool
 
-Numeric standard functions and operator overloading
+8. Numeric standard functions and operator overloading
 
 - op div;
 > fn : (int*int) -> int
 
-String standard functions
+9. String standard functions
 
 - op ^;
 > fn : (string * string) -> string
@@ -1003,3 +1018,41 @@ String standard functions
 
 - size "hello";
 > 5 : int
+
+10. List standard functions
+
+- hd;
+> fn : ('a list) -> 'a
+
+- hd [1,2,3,4,5];
+> 1 : int
+
+- tl;
+> fn : ('a list) -> ('a list)
+
+- tl ["a","b"]
+> ["b"] : string list
+
+- op ::;
+> ('a * ('a list)) -> ('a list)
+
+- 0::[1,2,3,4,5];
+>[0,1,2,3,4,5] : int list
+
+11. Characters,strings and lists
+
+- ord;
+> fn : string -> int
+
+- chr;
+> fn : int -> string
+
+- chr 54;
+> "6" : string
+
+- explode;
+> fn : string -> (string list)
+
+- explode "hello";
+> ["h","e","l","l","o"] : string list
+
