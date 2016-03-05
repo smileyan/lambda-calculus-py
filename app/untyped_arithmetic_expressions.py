@@ -144,3 +144,29 @@ as follows:
 3.5.17 big-step semantics, directly formulates the notion of "this term evaluates to that final value"
                 v ⇓ v                (B-VALUE)
           t1 ⇓ true t2 ⇓ v2
+ ----------------------------------  (B-IFTRUE)
+     if t1 then t2 else t3 ⇓ v2
+
+          t1 ⇓ true t3 ⇓ v3
+ ----------------------------------  (B-IFFALSE)
+     if t1 then t2 else t3 ⇓ v3
+
+               t1 ⇓ nv1
+          ------------------         (B-SUCC)
+          succ t1 ⇓ succ nv1
+
+               t1 ⇓ 0
+          ------------------         (B-PREDZERO)
+          pred t1 ⇓ 0
+
+             t1 ⇓ succ nv1
+          ------------------         (B-PREDSUCC)
+             pred t1 ⇓ nv1
+
+               t1 ⇓ 0
+          ------------------         (B-ISZEROZERO)
+          iszero t1 ⇓ true
+
+              t1 ⇓ succ nv1
+          ------------------         (B-ISZEROSUCC)
+          iszero t1 ⇓ false

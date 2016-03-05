@@ -43,18 +43,6 @@ is called its contractum
 Definition 1.26 A term Q which contains no β-redexed is called a 
 β-normal form (or a term is β-normal form or just a β-nf)
 
-2A Introduction to CL
-A(x,y) = x + y (for all x,y)
-(C(f))(x,y) = f(y,x)
-A = C(A)
-
-B, which composes two functions: (B(f,g))(x) = f(g(x));
-B`, a reversed composition operator: (B`(f,g))(x) = g(f(x));
-I, the identify operator: I(f) = f;
-K, which forms constant functions: (K(a))(x) = a;
-S, a stronger composition operator: (S(f,g))(x) = f(x,g(x));
-W, for doubling or 'diagonalizing': (W(f))(x) = f(x,x).
-
 identify = lambda x: x
 
 def self_apply():
@@ -1056,3 +1044,17 @@ fn : (bool * bool) -> bool
 - explode "hello";
 > ["h","e","l","l","o"] : string list
 
+- implode;
+> fn: (string list) -> string
+
+- implode ["Time ","for ", "tea?"]
+> "Time for tea?" : string
+
+12 Comparison operators
+
+13 Function
+
+fn <bound variables> => expression
+
+- fn x => x + 1
+> fn : int -> int
