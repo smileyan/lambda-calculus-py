@@ -16,3 +16,12 @@ one occurence of
               IX by X,     or
              KXY by X,     or
             SXYZ by XZ(YZ).
+
+Defination 2.10 A Weak normal form (or weak nf or term in weak normal form)
+is a term that contains no weak redexes. Iff a term U weakly reduces to a
+weak normal form X, we call X a weak normal form of U.
+
+Example 2.11 Define B ≡ S(KS)K. Then BXYZ▷ω X(YZ) for all terms X,Y and Z
+
+BXYZ ≡    S(KS)KXYZ 
+     ▷1ω  KSX(KX)YZ

@@ -1058,3 +1058,14 @@ fn <bound variables> => expression
 
 - fn x => x + 1
 > fn : int -> int
+
+- fn x => fn y => not (x orelse y);
+> fn : bool -> (bool -> bool)
+
+- fn (x,y) => not (x orelse y);
+> fn : (bool * bool) -> bool
+
+14 make bound variables` types explicit
+
+- fn (x:int) => x*x;
+> fn : int -> int
