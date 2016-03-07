@@ -1069,3 +1069,54 @@ fn <bound variables> => expression
 
 - fn (x:int) => x*x;
 > fn : int -> int
+
+- fn (x:int,y:int) => x*x+y*y;
+> fn : (int*int) -> int
+
+15 Definition
+
+val <name> = <expression>
+
+- val sq = fn (x:int) => x*x
+> val sq = fn : int -> int
+
+16 Conditional expression
+
+if <expression1>
+then <expression2>
+else <expressions>
+
+- val max = fn (x:int,y:int) => if x>y
+                                then x
+                                else y;
+> val max = fn : (int * int) -> int
+
+- val imp = fn (x,y) => if x
+                        then y
+                        else true;
+> val imp = fn : (bool * bool) -> bool
+
+17 Recursion and function definitions
+
+- val rec length = fn (l:int list) => if l = []
+                                        then 0
+                                        else 1 + (length (tl l))
+> val length = fn : (int list) -> int
+
+fun <name> <bound variables> = <expression> ==
+val rec <name> = fn <bound variables> => <expression>
+
+- fun squarel (l:int list) =
+   if l = []
+   then []
+   else ((hd l)*(hd l))::(squarel (tl l));
+> fun squarel = fn : (int list) -> (int list)
+
+- fun sinsert (s:string,l:string list) =
+   if l = []
+   then [s]
+   else
+    if s < (hd l)
+    then s::l
+    else (hd l)::(sinsert (s,(tl l)));
+> val sinsert = fn : (string * (string list)) -> (string list)
