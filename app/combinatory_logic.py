@@ -24,4 +24,26 @@ weak normal form X, we call X a weak normal form of U.
 Example 2.11 Define B ≡ S(KS)K. Then BXYZ▷ω X(YZ) for all terms X,Y and Z
 
 BXYZ ≡    S(KS)KXYZ 
-     ▷1ω  KSX(KX)YZ
+     ▷1ω  KSX(KX)YZ by contracting S(KS)KX to KSX(KX)
+     ▷1ω  S(KX)YZ   by contracting SKX TO S
+     ▷1ω  KXZ(YZ)   by contracting S(KX)YZ
+     ▷1ω  X(YZ)     by contracting KXZ.
+
+Lemma 2.14 (Substitution lemma for ▷ω)
+  (a) X ▷ω Y => FV(X) > FV(Y);
+  (b) X ▷ω Y => [X/v]Z ▷ω [Y/v]Z;
+
+Theorem 2.15 (Church-Rosser theorem for ▷ω) If U ▷ω X and
+U ▷ω Y, then there exists a CL-term T such that
+          X ▷ω T and Y ▷ω T.
+
+Corollary 2.15.1 (Uniqueness of nf) A CL-term can have at most
+on weak normal form.
+
+2C Abstraction in CL
+
+Defination 2.18 (Abstraction) For every CL-term M and every
+variable x, a CL-term called [x].M is defined by induction on M, thus:
+
+ (a) [x].M  = KM            if x ≠ FV(M)
+ (b) [x].x  = I

@@ -1120,3 +1120,27 @@ val rec <name> = fn <bound variables> => <expression>
     then s::l
     else (hd l)::(sinsert (s,(tl l)));
 > val sinsert = fn : (string * (string list)) -> (string list)
+
+9.18 Tuple selection
+
+- fun tname (n:(string*string), d:string, p:int) = n;
+> val tname = fn : ((string * string) * string * int) -> (string * string)
+
+- fun tdept (n:(string*string), d:string, p:int) = d;
+> val tdept = fn : ((string * string) * string * int) -> string
+
+- fun tno (n:(string*string), d:string, p:int) = p;
+> val tno = fn : ((string * string) * string * int) -> int
+
+9.19 Pattern matching
+
+- fun ihd ((h:int)::(t:int list)) = h;
+> val ihd = fn : (int list) -> int
+
+- fun itl ((h:int)::(t:int list)) = t;
+> val itl = fn : (int list) -> (int list)
+
+fun <name> <pattern1> = <expression1> |
+    <name> <pattern2> = <expression2> |
+    ...
+    <name> <patternN> = <expressionN> |
