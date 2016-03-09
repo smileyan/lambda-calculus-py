@@ -45,5 +45,11 @@ on weak normal form.
 Defination 2.18 (Abstraction) For every CL-term M and every
 variable x, a CL-term called [x].M is defined by induction on M, thus:
 
- (a) [x].M  = KM            if x ≠ FV(M)
- (b) [x].x  = I
+ (a) [x].M  = KM               if x ≠ FV(M;
+ (b) [x].x  = I;
+ (c) [x].Ux = U                if x ≠ FV(U)
+ (f) [x].UV = S([x].U)([x].V)  if neither (a) nor (c) applies.
+ 
+ Example 2.19
+         [x].xy = S([x].x)([x].y)    by 2.18 (f)
+                = SI(Ky)             by 2.18 (b) and (a)

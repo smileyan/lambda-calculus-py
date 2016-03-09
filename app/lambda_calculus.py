@@ -1144,3 +1144,45 @@ fun <name> <pattern1> = <expression1> |
     <name> <pattern2> = <expression2> |
     ...
     <name> <patternN> = <expressionN> |
+
+- fun captital "Denmark" = "Copenhagen" |
+      captital "Finland" = "Helsinki"   |
+      captital "Norway"  = "Oslo"       |
+      captital _         =  "not in cap";
+> val captital = fn : string -> string
+
+- fun length [] = 0 |
+      length (_::(t:int list)) = 1 + (length t);
+> val length = fn : (int list) -> int
+
+- fun cubes 0 = [0] |
+      cubes (n:int) = (n*n*n)::(cubes (n-1));
+> val cubes = fn int -> (int list)
+
+- fun sifind _ [] = "can't find it" |
+      sifind 0 ((h:string)::_) = h  |
+      sifind (i:int) (_::(t:string list)) = sifind (i-1) t;
+> val sifind = fn : int -> ((string list) -> string)
+
+9.20 Local definitions
+
+SML uses the let ... in ... notatin for local definitions
+
+    let val <name> = <expression1>
+    in <expression2>
+    end
+
+    let fun <name> <pattern> = <expression1>
+    in <expression2>
+    end
+
+- fun sort [] = [] |
+      sort ((h:int)::(t:int list)) =
+       let fun insert (i:int) [] = [i] |
+               insert (i:int) ((h:int)::(t:int list)) =
+                if i<h
+                then i::h::t
+                else h::(insert i t)
+       in insert h (sort t)
+       end
+> val sort = fn : (int list) -> (int list)
