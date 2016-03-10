@@ -68,4 +68,27 @@ id(λz. id z)
 Under this strategy(and the ones below), the evaluation relation is actually a 
 partial function: each term t evaluates in one step to at most one term t`.
 
-3. 
+3. The call by name strategy is yet more restrictive, allowing no reductions 
+inside abstractions. Starting from the same term, we would perform the 
+first two reductions as under normal-order, but then stop before the last 
+and regard λz. id z as a normal form:
+
+id(id(λz. id z))
+----------------
+id(λz. id z)
+-----------
+λz. id z
+
+call by need
+
+4. Most languages use a call by value strategy, in which only outermost re-
+dexes are reduced and where a redex is reduced only when is right-hand
+size has already been reduced to a value
+
+id(id(λz. id z))
+----------------
+id(λz. id z)
+-----------
+λz. id z
+
+5.2 Programming in the Lambda-Calculus

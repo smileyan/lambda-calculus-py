@@ -1186,3 +1186,68 @@ SML uses the let ... in ... notatin for local definitions
        in insert h (sort t)
        end
 > val sort = fn : (int list) -> (int list)
+
+21. Type expressions and abbreviated types
+
+type <abbreviation> = <type expression>
+
+- type forename = string;
+> type forename = string
+
+- type surname = string;
+> type surname = string
+
+- type person = forename * surname;
+> type person = forename * surname
+
+- type department = string;
+> type department = string
+
+- type extension = int;
+> type extension = int
+
+- type entry = person * department * extension;
+> type entry = person * department * extension
+
+22 Type variables and polymorphism
+
+     - fun hd (h::t) = h;
+     > val hd = fn : (`a list) -> `a
+     
+     - fun tl (h::t) = t;
+     > val tl = fn : (`a list) -> (`a list)
+     
+     ::
+     (`a * (`a list)) -> (`a list)
+     
+     - fun first (x,y,x) = x;
+     > val first = fn : (`a * `b * `c) -> `a 
+     
+     - fun second (x,y,x) = y;
+     > val second = fn : (`a * `b * `c) -> `b 
+     
+     - fun third (x,y,z) = z;
+     > val third = fn : (`a * `b * `c) -> `z
+     
+     - fun length [] = 0 |
+           length (h::t) = 1 + (length t);
+     > val length = fn : (`a list) -> list
+     
+     - fun insert i [] = [i] |
+           insert i (h::t) =
+            if i<h
+            then i::h::t
+            else h::(insert i t);
+     
+     - fun insert _ i [] = [i] |
+           insert comp i (h::t) =
+            if comp (i,h)
+            then i::h::t
+            else h::(insert com i t); 
+     > val insert = ((`a * `a) -> bool) -> (`a -> ((`a list) -> (`a list)))
+     
+     - val sinsert = insert (fn (s1:string,s2:string) => s1<2);
+     > val sinsert = fn : string -> ((string, list) -> (string list))
+     
+     - val iinsert = insert (fn (i1:int,i2:int) => i1<i2);
+     > val iinsert = fn : int -> ((int list) -> (int list))

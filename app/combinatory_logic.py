@@ -53,3 +53,10 @@ variable x, a CL-term called [x].M is defined by induction on M, thus:
  Example 2.19
          [x].xy = S([x].x)([x].y)    by 2.18 (f)
                 = SI(Ky)             by 2.18 (b) and (a)
+
+Warning 2.20 In lc an expression lambdax can be part of a lambda term,
+for example the term lambda(x).xy . But in CL, the corresponding expression
+[x] is not part of the formal language of CL-term
+
+Lemma 2.28 (Substitution and abstraction)
+  (a) FV([x].M) = FV(M) - {x}        if x belong to FV(M)
