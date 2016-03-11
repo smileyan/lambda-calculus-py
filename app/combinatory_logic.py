@@ -60,3 +60,23 @@ for example the term lambda(x).xy . But in CL, the corresponding expression
 
 Lemma 2.28 (Substitution and abstraction)
   (a) FV([x].M) = FV(M) - {x}        if x belong to FV(M)
+
+
+                 3
+The Power of lambda and combinators
+
+             3A Introduction
+
+Notation 3.1 This chapter is written in a neutral notation, which may
+be interpreted in either lambda or CL, as follows/
+
+Nation
+
+term 
+
+Defination 3.2  A combinator is a closed pure term, i.e. a term
+containing neither free variables nor atomic constants, and (in CL) a
+term whose only atoms are the basic combinators I,K,S. In lambda, the
+following combinator are given special names;
+
+B = ->(xyz).x(yz),    B` = ->(xyz).y(xz)

@@ -1251,3 +1251,53 @@ type <abbreviation> = <type expression>
      
      - val iinsert = insert (fn (i1:int,i2:int) => i1<i2);
      > val iinsert = fn : int -> ((int list) -> (int list))
+
+23. New types
+
+A new concrete type may be introduced by a datatype binding.
+
+1. listing base values explicitly
+2. defining structured values in terms of base values and other structured values.
+
+      datatype <constructor> = <constructor1> |
+                               <constructor2> |
+                               ...
+                               <constructorN>
+
+      - datatype bool = true | false;
+      > datatype bool = true | false;
+        con true = true : bool
+        con false = false : bool
+
+      - datatype traffic_light = red | red_amber | green | amber;
+      > datatype traffic_light = red | red_amber | green | amber
+        con red = red : traffic_light
+        con red_amber = red_amber : traffic_light
+        con green = green : traffic_light
+        con amber = amber : traffic_light
+
+      - fun change red         = red_amber |
+            change red_amber   = green     |
+            change green       = amber     |
+            change amber       = red;
+      > val change = fn : traffic_light -> traffic_light
+
+      datatype <constructor> = <constructor1> of <type expression1> |
+                               <constructor2> of <type expression2> |
+                               ...
+                               <constructorN> of <type expressionN> |
+
+      - datatype intlist = intnil | intcons of int * intlist;
+      > datatype intlist = intnil | intcons of int * intlist
+        con intnil = intnil : intlist
+        con intcons = fn : (int * intlist) -> intlist
+
+      - intcons(1,intnil);
+      > intcons(1,intnil) : intlist
+      
+      - intcons(1,intcons(2,intnil));
+      > intcons(1,intcons(2,intnil)) : intlist
+      
+      - intcons(1,intcons(2,intcons(3,intnil)));
+      > intcons(1,intcons(2,intcons(3,intnil))) : intlist
+      

@@ -92,3 +92,32 @@ id(λz. id z)
 λz. id z
 
 5.2 Programming in the Lambda-Calculus
+
+Multiple Arguments: currying
+
+Church Booleans
+
+tru = λt.λf.t;
+fls = λt.λf.f;
+
+# a combinator test
+test = λl.λm.λn.lmn;
+
+   test tru v w
+=  (λl.λm.λn. l m n) tru v w  by difinition
+-> (λm.λn. tru m n) v w       reducing the underlined redex
+-> (λn. tru v n) w            reducing the underlined redex
+-> tru v w                    reducing the underlined redex
+=  (λt.λf.t) v w              by difinition
+-> (λf.v) w                   reducing the underlined redex
+-> v                          reducing the underlined redex
+
+and = λb.λc. b c fls;
+
+and tru tru;
+
+=  (λb.λc. b c fls) tru tru
+-> tru tru fls                 reducing the underlined redex
+-> λt.λf.t tru fls             by difinition
+-> λf.tru fls                  reducing the underlined redex
+-> tru                         reducing the underlined redex
