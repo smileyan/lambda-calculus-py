@@ -118,6 +118,6 @@ and tru tru;
 
 =  (λb.λc. b c fls) tru tru
 -> tru tru fls                 reducing the underlined redex
--> λt.λf.t tru fls             by difinition
+=  λt.λf.t tru fls             by difinition
 -> λf.tru fls                  reducing the underlined redex
 -> tru                         reducing the underlined redex

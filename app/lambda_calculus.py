@@ -1301,3 +1301,13 @@ A new concrete type may be introduced by a datatype binding.
       - intcons(1,intcons(2,intcons(3,intnil)));
       > intcons(1,intcons(2,intcons(3,intnil))) : intlist
       
+      - datatype `a list = lnil | cons of `a * (`a list);
+      > datatype `a list = lnil | cons of `a * (`a list)
+        con lnil : `a list
+        con cons  = fn : (`a * `a list) -> (`a list)
+      
+      - type intlist = int list
+      > type intlist = int list
+      
+      - cons("ant",lnil);
+      > cons("ant",lnil) : string list
