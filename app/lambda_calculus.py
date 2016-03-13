@@ -1311,3 +1311,14 @@ A new concrete type may be introduced by a datatype binding.
       
       - cons("ant",lnil);
       > cons("ant",lnil) : string list
+      
+      - fun sum intnil = 0 |
+            sum (intcons(x:int, y:intlist)) = x + (sum y);
+      - val sum = fn : intlist -> int
+      
+      - sum (intcons(9,intcons(8,intcons(7,intnil))));
+      > 24 : int
+      
+      - fun join lnil = "" |
+            join (cons(s:string,l:(string list))) = s^join l;
+      > val join = fn : (string list) -> string
