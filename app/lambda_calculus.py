@@ -1322,3 +1322,32 @@ A new concrete type may be introduced by a datatype binding.
       - fun join lnil = "" |
             join (cons(s:string,l:(string list))) = s^join l;
       > val join = fn : (string list) -> string
+      
+      - datatype number = int | real;
+      > datatype number = int | real
+        con int = int : number
+        con real = int : number
+      
+      
+      - datatype number = intnumb of int | realnumb of real;
+      > datatype number = intnumb of int | realnumb of real
+        con intnumb = fn : int -> number
+        con realnumb = fn : real -> number
+      
+      - intnumb(1);
+      > intnumb(1) : number
+      
+      - realnumb(1.1)
+      > realnumb(1.1) : number
+      
+      - fun ivalue (intnumb(n:int)) = n
+      > val ivalue = fn : number -> int
+      
+      - fun rvalue (realnumb(n: real)) = n
+      > val rvalue = fn : number -> real
+      
+      - ivalue (intnumb(1));
+      > 3 : int
+      
+      - rvalue (realnumb(1.1));
+      > 1.1 : real      
