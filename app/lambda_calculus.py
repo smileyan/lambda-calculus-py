@@ -1350,4 +1350,11 @@ A new concrete type may be introduced by a datatype binding.
       > 3 : int
       
       - rvalue (realnumb(1.1));
-      > 1.1 : real      
+      > 1.1 : real
+
+24. Tree
+
+     - datatype inttree = empty | node of int * inttree * inttree
+     > datatype inttree = empty | node of int * inttree * inttree
+       con empty = empty : inttree
+       con node = fn : (int * inttree * inttree) -> inttree
