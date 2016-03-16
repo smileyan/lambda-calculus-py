@@ -43,6 +43,24 @@ is called its contractum
 Definition 1.26 A term Q which contains no β-redexed is called a 
 β-normal form (or a term is β-normal form or just a β-nf)
 
+Remark 1.29 Some terms can be reduced in more than one way.
+One such term, from Example 1.25(c), is (λx.(λy.yx)z)v 1β 
+
+The Church-Rosser theorem below will show that the normal form of
+a term is indeed unique, provided we ignore changes of bound variables.
+
+Lemma 1.30 P β Q => FV(P) > FV(Q)
+
+Lemma 1.31 (Substitution and β) If P β P` and Q β Q`, then
+           [P/x]Q β [P`/x]Q`.
+
+Theorem 1.32 (Church-Rosser theorem for β) If P β M and
+P β N (see Figure 1:1), then there exists a term T such that
+           M β T and N β T.
+           
+Corollary 1.32.1 If P has a β-normal form, it is unique modolo = a ;
+that is, if P has β-normal forms M and N, then M a N.
+
 identify = lambda x: x
 
 def self_apply():
@@ -1358,3 +1376,23 @@ A new concrete type may be introduced by a datatype binding.
      > datatype inttree = empty | node of int * inttree * inttree
        con empty = empty : inttree
        con node = fn : (int * inttree * inttree) -> inttree
+    
+    - fun add (v:int) empty = node(v,empty,empty) |
+          add (v:int) (node(nv:int,l:inttree,r:inttree)) =
+           if v < nv
+           then node(nv,add v l,r)
+           else node(nv,l,add v r);
+    > val add = fn : int -> (inttree -> inttree)
+    
+    - fun traverse empty = [] |
+          traverse (node(v:int,l:inttree,r:inttree)) =
+           append (traverse l) (v::traverse r);
+    > val traverse = fn : inttree -> (int list)
+    
+    - traverse root;
+    > [2,3,4,5,7,9] : int list
+    
+    - datatype `a tree = empty | node of `a * (`a tree) * (`a tree);
+    > datatype `a tree = empty | node of `a * (`a tree) * (`a tree)
+      con empty = empty : (`a tree)
+      con ndoe = fn : (`a * (`a tree) (`a tree)) -> (`a tree)
