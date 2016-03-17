@@ -67,3 +67,43 @@ VARIABLES
   val upcase_first_entry : string -> string = <fun>
   
  FUNCTIONS
+ 
+ Anonymous Functions
+ 
+ # (fun x -> x + 1);;
+  - : int -> int = <fun>
+ 
+ # (fun x -> x + 1) 7;;
+  - : int = 8
+ 
+ # List.map ~f:(fun x -> x + 1) [1;2;3];;
+  - : int list = [2; 3; 4]
+ 
+ # let increments = [ (fun x -> x + 1); (fun x -> x + 2) ];;
+  val increments : (int -> int) list = [<fun>; <fun>]
+ # List.map ~f:(fun g -> g 5) increments;;
+  - : int list = [6; 7]
+ 
+ # let plusone = (fun x -> x + 1);;
+  val plusone : int -> int = <fun>
+ # plusone 3;;
+  - : int = 4
+ 
+ # let plusone x = x + 1;;
+  val plusone : int -> int = <fun>
+  
+ # (fun x -> x + 1) 7;;
+  - : int = 8
+ # let x = 7 in x + 1;;
+  - : int = 8
+
+Multiargument functions
+
+ # let abs_diff x y = abs (x - y);;
+  val abs_diff : int -> int -> int = <fun>
+ # abs_diff 3 4;;
+  - : int = 1
+ 
+ # let abs_diff = 
+     (fun x -> (fun y -> abs (x - y)));;
+  val abs_diff : int -> int -> int = <fun>

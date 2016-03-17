@@ -1396,3 +1396,20 @@ A new concrete type may be introduced by a datatype binding.
     > datatype `a tree = empty | node of `a * (`a tree) * (`a tree)
       con empty = empty : (`a tree)
       con ndoe = fn : (`a * (`a tree) (`a tree)) -> (`a tree)
+      
+    - fun add _ (v:'a) empty = node(v,empty,empty) |
+          add (less:'a -> ('a tree))
+              (v:'a)
+              (node(nv:'a,l:'a tree,r:'a tree)) =
+            if less v nv
+            then node(nv,add less v l,r)
+            else node(nv,l,add less v r);
+    > val add = fn : ('a -> ('a -> bool)) ->
+                     ('a -> (('a tree) -> ('a tree)))
+    
+    - fun traverse empty = [] |
+          traverse (node(v:'a,l:'a tree,'a tree)) =
+           append (traverse l) (v::traverse r);
+    > val traverse = fn : ('a tree) -> ('a list)
+
+25 lambda calculus in ML
