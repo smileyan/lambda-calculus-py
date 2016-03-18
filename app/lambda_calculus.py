@@ -1413,3 +1413,33 @@ A new concrete type may be introduced by a datatype binding.
     > val traverse = fn : ('a tree) -> ('a list)
 
 25 lambda calculus in ML
+   - fn x => x;
+   > fn : 'a -> 'a
+   
+   - (fn x => x) (fn x => x);
+   > fn : 'a => 'a
+   
+   - fn f => fn x => (f x);
+   > fn : ('a -> 'b) -> ('a -> 'b)
+   
+   - (fn f => fn x => (f x)) (fn x => x) (fn x => x);
+   > fn : 'a -> 'a
+   
+   - val identify = fn x => x;
+   > val identify = fn : 'a -> 'a
+   
+   - identify identify;
+   > fn : 'a -> 'a
+   
+   - val apply = fn f => fn x => (f x);
+   > val apply = fn : ('a -> 'a) -> ('a -> 'b)
+   
+   - apply identify identify;
+   > fn : 'a -> 'a
+
+26 Other features
+
+1) abstract type construction
+2) modularisatio
+3) exceptions to change control flow
+4) imperative constructs for assignment, I/O and iteration.
