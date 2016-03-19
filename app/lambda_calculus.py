@@ -925,266 +925,271 @@ evaluation of the same expression. Lazy evaluation is also known as call by need
 
 FUNCTIONAL PROGRAMMING IN STANDARD ML
 
-Introduction
+1. Introduction
 
-- <expression>;
-> <result>
+    - <expression>;
+    > <result>
 
-Types: types are central to SML. Every object and construct is typed.
+2. Types: types are central to SML. Every object and construct is typed.
 
-Standard types: boolean, integers, strings, lists, tuples.
+    Standard types: boolean, integers, strings, lists, tuples.
 
-<value> : <type>
-fn : <type>
+    <value> : <type>
+    fn : <type>
 
-Basic types - booleans, integers and strings
+3. Basic types - booleans, integers and strings
 
-The type expression for a basic type is the type's identify.
-The boolean type has identifier:
-           bool
-and values:
-          true false
-- true;
-> true : bool
+    The type expression for a basic type is the type's identify.
+    The boolean type has identifier:
+            bool
+    and values:
+            true false
+    - true;
+    > true : bool
 
-The integer type has identifier:
-          int 
-- 42;
-> 42 : int
-- ~84
-> ~84 : int
+    The integer type has identifier:
+            int 
+    - 42;
+    > 42 : int
+    - ~84
+    > ~84 : int
 
-The string type has identifier:
-        string
-- "Is this a string?";
-> "Is this a string?" : string
+    The string type has identifier:
+            string
+    - "Is this a string?";
+    > "Is this a string?" : string
 
-List
+4. List
 
-empty list 
-[]
+    empty list 
+    []
 
-The type expression for a list depends on the element type:
+    The type expression for a list depends on the element type:
 
-<element type> list
+    <element type> list
 
-- [1,4,9,16];
-> [1,4,9,16] : int list
+    - [1,4,9,16];
+    > [1,4,9,16] : int list
 
-- [[1,2],[3,4]]
-> [[1,2],[3,4]] : (int list) list
+    - [[1,2],[3,4]]
+    > [[1,2],[3,4]] : (int list) list
 
-Tuples
+5. Tuples
 
-("ui",1,2)
+    ("ui",1,2)
 
-A tuple's type is represented by its element's types separated by *s:
-<element1 type> * <element2 type> * ...
+    A tuple's type is represented by its element's types separated by *s:
+    <element1 type> * <element2 type> * ...
 
-- ("aa",1)
-> ("aa",1) : string * int
+    - ("aa",1)
+    > ("aa",1) : string * int
 
 6. Function types and expressions
 
-fn : <domain type> -> <range type>
+ fn : <domain type> -> <range type>
 
-<function expression> <argument expression>
+ <function expression> <argument expression>
 
 7. Boolean standard functions
 
-- not true;
-> false : bool
+ - not true;
+ > false : bool
 
-- not;
-> fn : bool -> bool
+ - not;
+ > fn : bool -> bool
 
-- true orelse false;
-> true : bool
+ - true orelse false;
+ > true : bool
 
-- true andalso false;
-> fasle: bool
+ - true andalso false;
+ > fasle: bool
 
-fn : (bool * bool) -> bool
+ fn : (bool * bool) -> bool
 
 8. Numeric standard functions and operator overloading
 
-- op div;
-> fn : (int*int) -> int
+ - op div;
+ > fn : (int*int) -> int
 
 9. String standard functions
 
-- op ^;
-> fn : (string * string) -> string
+ - op ^;
+ > fn : (string * string) -> string
 
-- "Happy"^" birthday!";
-> "Happy birthday!" : string
+ - "Happy"^" birthday!";
+ > "Happy birthday!" : string
 
-- size;
-> fn : string -> int
+ - size;
+ > fn : string -> int
 
-- size "hello";
-> 5 : int
+ - size "hello";
+ > 5 : int
 
 10. List standard functions
 
-- hd;
-> fn : ('a list) -> 'a
+ - hd;
+ > fn : ('a list) -> 'a
 
-- hd [1,2,3,4,5];
-> 1 : int
+ - hd [1,2,3,4,5];
+ > 1 : int
 
-- tl;
-> fn : ('a list) -> ('a list)
+ - tl;
+ > fn : ('a list) -> ('a list)
 
-- tl ["a","b"]
-> ["b"] : string list
+ - tl ["a","b"]
+ > ["b"] : string list
 
-- op ::;
-> ('a * ('a list)) -> ('a list)
+ - op ::;
+ > ('a * ('a list)) -> ('a list)
 
-- 0::[1,2,3,4,5];
->[0,1,2,3,4,5] : int list
+ - 0::[1,2,3,4,5];
+ >[0,1,2,3,4,5] : int list
 
 11. Characters,strings and lists
 
-- ord;
-> fn : string -> int
+ - ord;
+ > fn : string -> int
 
-- chr;
-> fn : int -> string
+ - chr;
+ > fn : int -> string
 
-- chr 54;
-> "6" : string
+ - chr 54;
+ > "6" : string
 
-- explode;
-> fn : string -> (string list)
+ - explode;
+ > fn : string -> (string list)
 
-- explode "hello";
-> ["h","e","l","l","o"] : string list
+ - explode "hello";
+ > ["h","e","l","l","o"] : string list
 
-- implode;
-> fn: (string list) -> string
+ - implode;
+ > fn: (string list) -> string
 
-- implode ["Time ","for ", "tea?"]
-> "Time for tea?" : string
+ - implode ["Time ","for ", "tea?"]
+ > "Time for tea?" : string
 
-12 Comparison operators
+12. Comparison operators
+    = <>
+    < <= >= >
+    
+    - "h" > "o"
+    > true : bool
+    
+13. Function
 
-13 Function
+ fn <bound variables> => expression
 
-fn <bound variables> => expression
+ - fn x => x + 1
+ > fn : int -> int
 
-- fn x => x + 1
-> fn : int -> int
+ - fn x => fn y => not (x orelse y);
+ > fn : bool -> (bool -> bool)
 
-- fn x => fn y => not (x orelse y);
-> fn : bool -> (bool -> bool)
+ - fn (x,y) => not (x orelse y);
+ > fn : (bool * bool) -> bool
 
-- fn (x,y) => not (x orelse y);
-> fn : (bool * bool) -> bool
+14. Making bound variables` types explicit
 
-14 make bound variables` types explicit
+ - fn (x:int) => x*x;
+ > fn : int -> int
 
-- fn (x:int) => x*x;
-> fn : int -> int
+ - fn (x:int,y:int) => x*x+y*y;
+ > fn : (int*int) -> int
 
-- fn (x:int,y:int) => x*x+y*y;
-> fn : (int*int) -> int
+15. Definition
 
-15 Definition
+ val <name> = <expression>
 
-val <name> = <expression>
+ - val sq = fn (x:int) => x*x
+ > val sq = fn : int -> int
 
-- val sq = fn (x:int) => x*x
-> val sq = fn : int -> int
+16. Conditional expression
 
-16 Conditional expression
+ if <expression1>
+ then <expression2>
+ else <expressions>
 
-if <expression1>
-then <expression2>
-else <expressions>
+ - val max = fn (x:int,y:int) => if x>y
+                                 then x
+                                 else y;
+ > val max = fn : (int * int) -> int
 
-- val max = fn (x:int,y:int) => if x>y
-                                then x
-                                else y;
-> val max = fn : (int * int) -> int
+ - val imp = fn (x,y) => if x
+                         then y
+                         else true;
+ > val imp = fn : (bool * bool) -> bool
 
-- val imp = fn (x,y) => if x
-                        then y
-                        else true;
-> val imp = fn : (bool * bool) -> bool
+17. Recursion and function definitions
 
-17 Recursion and function definitions
+ - val rec length = fn (l:int list) => if l = []
+                                         then 0
+                                         else 1 + (length (tl l))
+ > val length = fn : (int list) -> int
 
-- val rec length = fn (l:int list) => if l = []
-                                        then 0
-                                        else 1 + (length (tl l))
-> val length = fn : (int list) -> int
+ fun <name> <bound variables> = <expression> ==
+ val rec <name> = fn <bound variables> => <expression>
 
-fun <name> <bound variables> = <expression> ==
-val rec <name> = fn <bound variables> => <expression>
+ - fun squarel (l:int list) =
+    if l = []
+    then []
+    else ((hd l)*(hd l))::(squarel (tl l));
+ > fun squarel = fn : (int list) -> (int list)
 
-- fun squarel (l:int list) =
-   if l = []
-   then []
-   else ((hd l)*(hd l))::(squarel (tl l));
-> fun squarel = fn : (int list) -> (int list)
+ - fun sinsert (s:string,l:string list) =
+    if l = []
+    then [s]
+    else
+     if s < (hd l)
+     then s::l
+     else (hd l)::(sinsert (s,(tl l)));
+ > val sinsert = fn : (string * (string list)) -> (string list)
 
-- fun sinsert (s:string,l:string list) =
-   if l = []
-   then [s]
-   else
-    if s < (hd l)
-    then s::l
-    else (hd l)::(sinsert (s,(tl l)));
-> val sinsert = fn : (string * (string list)) -> (string list)
+18. Tuple selection
 
-9.18 Tuple selection
+ - fun tname (n:(string*string), d:string, p:int) = n;
+ > val tname = fn : ((string * string) * string * int) -> (string * string)
 
-- fun tname (n:(string*string), d:string, p:int) = n;
-> val tname = fn : ((string * string) * string * int) -> (string * string)
+ - fun tdept (n:(string*string), d:string, p:int) = d;
+ > val tdept = fn : ((string * string) * string * int) -> string
 
-- fun tdept (n:(string*string), d:string, p:int) = d;
-> val tdept = fn : ((string * string) * string * int) -> string
+ - fun tno (n:(string*string), d:string, p:int) = p;
+ > val tno = fn : ((string * string) * string * int) -> int
 
-- fun tno (n:(string*string), d:string, p:int) = p;
-> val tno = fn : ((string * string) * string * int) -> int
+19. Pattern matching
 
-9.19 Pattern matching
+ - fun ihd ((h:int)::(t:int list)) = h;
+ > val ihd = fn : (int list) -> int
 
-- fun ihd ((h:int)::(t:int list)) = h;
-> val ihd = fn : (int list) -> int
+ - fun itl ((h:int)::(t:int list)) = t;
+ > val itl = fn : (int list) -> (int list)
 
-- fun itl ((h:int)::(t:int list)) = t;
-> val itl = fn : (int list) -> (int list)
+ fun <name> <pattern1> = <expression1> |
+     <name> <pattern2> = <expression2> |
+     ...
+     <name> <patternN> = <expressionN> |
 
-fun <name> <pattern1> = <expression1> |
-    <name> <pattern2> = <expression2> |
-    ...
-    <name> <patternN> = <expressionN> |
+ - fun captital "Denmark" = "Copenhagen" |
+       captital "Finland" = "Helsinki"   |
+       captital "Norway"  = "Oslo"       |
+       captital _         =  "not in cap";
+ > val captital = fn : string -> string
 
-- fun captital "Denmark" = "Copenhagen" |
-      captital "Finland" = "Helsinki"   |
-      captital "Norway"  = "Oslo"       |
-      captital _         =  "not in cap";
-> val captital = fn : string -> string
+ - fun length [] = 0 |
+       length (_::(t:int list)) = 1 + (length t); 
+ > val length = fn : (int list) -> int
 
-- fun length [] = 0 |
-      length (_::(t:int list)) = 1 + (length t);
-> val length = fn : (int list) -> int
+ - fun cubes 0 = [0] |
+       cubes (n:int) = (n*n*n)::(cubes (n-1));
+ > val cubes = fn int -> (int list)
 
-- fun cubes 0 = [0] |
-      cubes (n:int) = (n*n*n)::(cubes (n-1));
-> val cubes = fn int -> (int list)
+ - fun sifind _ [] = "can't find it" |
+       sifind 0 ((h:string)::_) = h  |
+       sifind (i:int) (_::(t:string list)) = sifind (i-1) t;
+ > val sifind = fn : int -> ((string list) -> string)
 
-- fun sifind _ [] = "can't find it" |
-      sifind 0 ((h:string)::_) = h  |
-      sifind (i:int) (_::(t:string list)) = sifind (i-1) t;
-> val sifind = fn : int -> ((string list) -> string)
+20. Local definitions
 
-9.20 Local definitions
-
-SML uses the let ... in ... notatin for local definitions
+ SML uses the let ... in ... notatin for local definitions
 
     let val <name> = <expression1>
     in <expression2>
@@ -1194,7 +1199,7 @@ SML uses the let ... in ... notatin for local definitions
     in <expression2>
     end
 
-- fun sort [] = [] |
+ - fun sort [] = [] |
       sort ((h:int)::(t:int list)) =
        let fun insert (i:int) [] = [i] |
                insert (i:int) ((h:int)::(t:int list)) =
@@ -1203,31 +1208,31 @@ SML uses the let ... in ... notatin for local definitions
                 else h::(insert i t)
        in insert h (sort t)
        end
-> val sort = fn : (int list) -> (int list)
+ > val sort = fn : (int list) -> (int list)
 
 21. Type expressions and abbreviated types
 
-type <abbreviation> = <type expression>
+ type <abbreviation> = <type expression>
 
-- type forename = string;
-> type forename = string
+ - type forename = string;
+ > type forename = string
 
-- type surname = string;
-> type surname = string
+ - type surname = string;
+ > type surname = string
 
-- type person = forename * surname;
-> type person = forename * surname
+ - type person = forename * surname;
+ > type person = forename * surname
 
-- type department = string;
-> type department = string
+ - type department = string;
+ > type department = string
 
-- type extension = int;
-> type extension = int
+ - type extension = int;
+ > type extension = int
 
-- type entry = person * department * extension;
-> type entry = person * department * extension
+ - type entry = person * department * extension;
+ > type entry = person * department * extension
 
-22 Type variables and polymorphism
+22. Type variables and polymorphism
 
      - fun hd (h::t) = h;
      > val hd = fn : (`a list) -> `a
@@ -1272,10 +1277,10 @@ type <abbreviation> = <type expression>
 
 23. New types
 
-A new concrete type may be introduced by a datatype binding.
+ A new concrete type may be introduced by a datatype binding.
 
-1. listing base values explicitly
-2. defining structured values in terms of base values and other structured values.
+ 1. listing base values explicitly
+ 2. defining structured values in terms of base values and other structured values.
 
       datatype <constructor> = <constructor1> |
                                <constructor2> |
@@ -1412,7 +1417,7 @@ A new concrete type may be introduced by a datatype binding.
            append (traverse l) (v::traverse r);
     > val traverse = fn : ('a tree) -> ('a list)
 
-25 lambda calculus in ML
+25. lambda calculus in ML
    - fn x => x;
    > fn : 'a -> 'a
    
@@ -1437,9 +1442,9 @@ A new concrete type may be introduced by a datatype binding.
    - apply identify identify;
    > fn : 'a -> 'a
 
-26 Other features
+26. Other features
 
-1) abstract type construction
-2) modularisatio
-3) exceptions to change control flow
-4) imperative constructs for assignment, I/O and iteration.
+ 1) abstract type construction
+ 2) modularisatio
+ 3) exceptions to change control flow
+ 4) imperative constructs for assignment, I/O and iteration.

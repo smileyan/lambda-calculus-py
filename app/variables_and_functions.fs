@@ -162,3 +162,23 @@ FUNCTIONS
    val ( +! ) : int * int -> int * int -> int * int = <fun>
   # (3,2) +! (-2,4);;
    - : int * int = (1, 6)
+  
+  # let (***) x y = (x ** y) ** y;;
+   Characters 17-18:
+   Error: This expression has type int but an expression was expected of type float
+   
+  # let ( *** ) x y = (x ** y) ** y;;
+   val ( *** ) : float -> float -> float = <fun>
+  
+  # Int.max 3 (-4);;
+   - : int = 3
+  # Int.max 3 -4;;
+   Characters -1-9:
+   Error: This expression has type int -> int
+          but an expression was expected of type int
+  
+  # (Int.max 3) -4;;
+   Characters -1-9:
+   Error: This expression has type int -> int
+          but an expression was expected of type int
+  
