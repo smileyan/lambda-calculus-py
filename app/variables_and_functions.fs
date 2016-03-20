@@ -178,7 +178,9 @@ FUNCTIONS
           but an expression was expected of type int
   
   # (Int.max 3) -4;;
-   Characters -1-9:
-   Error: This expression has type int -> int
+   Characters -1-10:
+   Error: This epression has type int -> int
           but an expression was expected of type int
   
+  # let (|>) x f = f x ;;
+   val ( |> ) : 'a -> ('a -> b') -> 'a = <fun>
