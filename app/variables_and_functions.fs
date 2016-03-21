@@ -67,7 +67,6 @@ VARIABLES
   val upcase_first_entry : string -> string = <fun>
   
 FUNCTIONS
- 
  Anonymous Functions
  
   # (fun x -> x + 1);;
@@ -184,3 +183,72 @@ FUNCTIONS
   
   # let (|>) x f = f x ;;
    val ( |> ) : 'a -> ('a -> b') -> 'a = <fun>
+  
+  # let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;
+   val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin"
+  #    String.split ~on:':' path
+     |> List.dedup ~compare:String.compare
+     |> List.iter ~f:print_endline
+     ;;
+    
+   /bin
+   /sbin
+   /usr/bin
+   /usr/local/bin
+   - : unit = ()
+  
+  #    let split_path = String.split ~on:":" path in
+     let deduped_path = List.dedup ~compare:String.compare split_path in
+     List.iter ~f:print_endline deduped_path
+     ;;
+     
+     
+    /bin
+    /sbin
+    /usr/bin
+    /usr/local/bin
+    - : unit = ()
+  
+  # List.iter ~f:print_endline ["Two", "lines"];;
+  
+   Two
+   lines
+   - : unit = ()
+  
+  # List.iter ~f:print_endline;;
+   - : string list -> unit = <fun>
+
+ Declaring Functions with Function
+  # let some_or_zero = function
+       | Some x -> x
+       | None -> 0
+    ;;
+   val some_or_zero : int option -> int = <fun>
+  # List.map ~f:some_or_zero [Some 3; None; Some 4];;
+   - : int list = [3; 0; 4]
+  
+  # let some_or_zero num_opt =
+      match num_opt with
+      | Some x -> x
+      | None -> 0
+    ;;
+   val some_or_zero : int option -> int = <fun>
+  
+  # let some_or_default default = function
+       | Some x -> x
+       | None -> default
+    ;;
+   val some_or_default : 'a -> 'a option -> 'a = <fun>
+  # some_or_default 3 (Some 5);;
+   - : int = 5
+  # List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
+   - : int list = [3; 100; 4]
+ Labeled Arguments
+  # let ratio ~num ~denom = float num /. float denom;;
+   val ratio : num:int -> denom:int -> float = <fun>
+  # ratio ~num:3 ~denom:10;;
+   - : float = 0.3
+  # ratio ~denom:10 ~num:3;;
+   - : float = 0.3
+  
+  
