@@ -251,4 +251,55 @@ FUNCTIONS
   # ratio ~denom:10 ~num:3;;
    - : float = 0.3
   
+  label punning
+   # let num = 3 in
+   let denom = 4 in
+   ratio ~num ~denom;;
+    - : float = 0.75
   
+   val create_hashtable : int -> bool -> ('a,'b) Hashtable.t 
+   val create_hashtable :
+     init_size:int -> allow_shrinking:bool -> ('a, 'b) Hashtable.t
+  
+   val substring: string -> int -> int -> string
+  
+   val substring: string -> pos:int -> len:int -> string
+  
+   #    String.split ~on:':' path
+     |> List.dedup ~compare:String.compare
+     |> List.iter ~f:print_endline
+     ;;
+    
+   /bin
+   /sbin
+   /usr/bin
+   /usr/local/bin
+   - : unit = ()
+  
+  Higher-order functions and labels
+  
+   # let apply_to_tuple f (first,second) = f ~first ~second;;
+    val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
+  
+   # let apply_to_tuple_2 f (first,second) = f ~second ~first;;
+    val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
+  
+   # let divide ~first ~second = first / second;;
+    val divide : first:int -> second:int -> int = <fun>
+  
+   # apply_to_tuple_2 divide (3,4);;
+    Characters 17-23:
+    Error: This expression has type first:int -> second:int -> int
+           but an expression was expected of type second:'a -> first:'b -> 'c
+   
+   # apply_to_tuple divide (3,4);;
+    - : int = 0
+
+ Optional Arguments
+  Induction
+  
+  Explicit passing of an optional argument
+  
+  Inference of labeled and optional arguments
+  
+  Optional arguments and partial application
