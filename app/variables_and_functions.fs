@@ -297,9 +297,40 @@ FUNCTIONS
 
  Optional Arguments
   Induction
-  
+   # let concat ?seq x y =
+     let seq = match seq with None -> "" | Some x -> x in
+     x ^ seq ^ y
+     ;;
+    val concat : ?seq:string -> string -> string -> string = <fun>
+   # concat "foo" "bar"     (* without the optional argument *);;
+    - : string = "foobar"
+   # concat ~seq:":" "foo" "bar"   (* with the optional argument *);;
+    - : string = "foo:bar"
+   
+   # let concat ?(seq="") x y = x ^ seq ^ y;;
+    val concat : ?seq:string -> string -> string -> string = <fun>
+   
   Explicit passing of an optional argument
-  
+   # concat ~seq:":" "foo" "bar" (* provide the optional argument *);;
+    - : string = "foo:bar"
+   # concat ?seq:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;
+    - : string = "foo:bar"
+   
+   # concat "foo" "bar" (* don't provide the optional argument *);;
+    - : string = "foobar"
+   # concat ?seq:None "foo" "bar" (* explicitly pass `None` *);;
+    - : string = "foobar"
+   
+   # let uppercase_concat ?(seq="") a b = concat ~seq (String.uppercase a) b ;;
+    val uppercase_concat : ?seq:string -> string -> string -> string = <fun>
+   # uppercase_concat "foo" "bar";;
+    - : string = "FOObar"
+   # uppercase_concat "foo" "bar" ~seq:":";;
+    - : string = "FOO:bar"
+   
+   # let uppercase_concat ?seq a b = concat ?seq (String.uppercase a) b;;
+    val uppercase_concat : ?seq:string -> string -> string -> string = <fun>
+   
   Inference of labeled and optional arguments
   
   Optional arguments and partial application
