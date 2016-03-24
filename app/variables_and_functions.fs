@@ -332,5 +332,75 @@ FUNCTIONS
     val uppercase_concat : ?seq:string -> string -> string -> string = <fun>
    
   Inference of labeled and optional arguments
+   # let numeric_deriv ~delta ~x ~y ~f =
+       let x' = x +. delta in
+       let y' = y +. delta in
+       let base = f ~x ~y in
+       let dx = (f ~x:x' ~y -. base) /. delta in
+       let dy = (f ~x ~y:y' -. base) /. delta in
+       (dx, dy)
+     ;;
+    val numeric_deriv :
+      delta:float ->
+      x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float = <fun>
+   
+   # let numeric_deriv ~delta ~x ~y ~f =
+       let x' = x +. delta in
+       let y' = y +. delta in
+       let base = f ~x ~y in
+       let dx = (f ~y ~x:x' -. base) /. delta in
+       let dy = (f ~x ~y:y' -. base) /. delta in
+       (dx, dy)
+     ;; 
+    Characters 130-131:
+    Error: This function is applied to arguments
+    in an order different from other calls.
+    This is only allowed when the real type is known.
+    
+   # let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
+      let x' = x +. delta in
+      let y' = y +. delta in
+      let base = f ~x ~y in
+      let dx = (f ~y ~x:x' -. base) /. delta in
+      let dy = (f ~x ~y:y' -. base) /. delta in
+      (dx, dy)
+    ;; 
+    val numeric_deriv :
+     delta:float ->
+     x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float = <fun>
   
   Optional arguments and partial application
+   # let colon_concat = concat ~seq:":";;
+    val colon_concat : string -> string -> string = <fun>
+   # colon_concat "a" "b"
+    - : string = "a:b"
+   
+   # let prepend_pound = concat "# ";;
+    val prepend_pound : string -> string = <fun>
+   # prepend_pound "a BASH  comment";;
+    - : string = "# a BASH comment"
+   
+   # prepend_pound "a BASH comment" ~seq:":";;
+    Characters -1-13:
+    Error: This function has type string -> string
+           It is applied to too many arguments; maybe you forgot a ';'.
+
+   The rule is: an optional argument is erased as soon as the first positional 
+    (i.e., neither labeled nor optional) argument defined after the optional argument is passed in.
+   
+   # let concat x ?(seq="") y = x ^ seq ^ y ;;
+    val concat : string -> ?seq:string -> string -> string = <fun>
+   # let prepend_pound = concat "# ";;
+    val prepend_pound : ?seq:string -> string -> string = <fun>
+   # prepend_pound "a BASH comment";;
+    - : string = "# a BASH comment"
+   # prepend_pound "a BASH comment" ~seq:"--- ";;
+    - : string = "# --- a BASH comment"
+   # concat "a" "b" ~seq:"=";;
+    - : string = "a=b"
+   # let concat x y ?(seq="") = x ^ seq ^ y ;;
+   
+    Characters 15-38
+    Warning 16: this optional argument cannot be erased.val concat : string -> string -> ?seq:string -> string = <fun>
+   # concat "a" "b";;
+    - : ?seq:string -> string = <fun>
