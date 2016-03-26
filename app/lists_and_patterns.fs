@@ -92,7 +92,7 @@ Chapter 3. Lists and Patterns
             
             # let run_bench tests =
               Bench.bench tests
-            ;;
+             ;;
              val run_bench : Bench.Test.t list -> unit = <fun>
             # [ Bench.Test.create ~name:"plus_one_match" (fun () ->
                   ignore (plus_one_match 10))
@@ -112,3 +112,30 @@ Chapter 3. Lists and Patterns
             # let rec sum_if l =
                 if List.is_empty l then 0
                 else List.hd_exn l + sum_if (List.tl_exn l)
+              ;;
+             val sum_if : int Core.Std.List.t -> int = <fun>
+            
+            # let numbers = List.range 0 1000 in
+              [ Bench.Test.create ~name:"sum" (fun () -> ignore (sum numbers))
+              ; Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers)) ]
+              |> run_bench
+              ;;
+                Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
+                ┌────────┬──────────┐
+                │ Name   │ Time/Run │
+                ├────────┼──────────┤
+                │ sum    │  11.51us │
+                │ sum_if │  62.27us │
+                └────────┴──────────┘
+              - : unit = ()
+        Detecting Errors
+            # let drop_zero l =
+                match l with
+                | [] -> []
+                | 0 :: tl -> drop_zero tl
+              ;;
+             Characters 26-84:
+             Warning 8: this pattern-matching is not exhaustive.
+             Here is an example of a value that is not matched:
+             1::_val drop_zero : int list -> 'a list = <fun>
+    USING THE LIST MODULE EFFECTIVELY
