@@ -139,3 +139,28 @@ Chapter 3. Lists and Patterns
              Here is an example of a value that is not matched:
              1::_val drop_zero : int list -> 'a list = <fun>
     USING THE LIST MODULE EFFECTIVELY
+        # printf "%s\n"
+            (render_table
+              ["language";"architect";"first release"]
+              [ ["Lisp" ;"John McCarthy" ;"1958"] ;
+                ["C"    ;"Dennis Ritchie";"1969"] ;
+                ["ML"   ;"Robin Milner"  ;"1973"] ;
+                ["OCaml";"Xavier Leroy"  ;"1996"] ;
+              ]);;
+
+
+            | language | architect      | first release |
+            |----------+----------------+---------------|
+            | Lisp     | John McCarthy  | 1958          |
+            | C        | Dennis Ritchie | 1969          |
+            | ML       | Robin Milner   | 1973          |
+            | OCaml    | Xavier Leroy   | 1996          |
+            - : unit = ()
+        # List.map ~f:String.length ["Hello"; "World!"];;
+         - : int list = [5; 6]
+        # List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;
+         - : int list = [3; 2; 3]
+        # List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
+         Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 <> 4 ").
+        # List.fold;;
+         - : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum = <fun>
