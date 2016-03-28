@@ -164,3 +164,61 @@ Chapter 3. Lists and Patterns
          Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 <> 4 ").
         # List.fold;;
          - : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum = <fun>
+        # List.fold [1;2;3;4] ~init:0 ~f:(+);;
+         - : int = 10
+        # List.fold ~init:[] ~f:(fun list x -> x :: list) [1;2;3;4];;
+         - : int list = [4;3;2;1]
+        # let max_lenght header rows =
+            let lengths l = List.map ~f:String.length l in
+            List.fold rows
+              ~init:(lengths header)
+              ~f:(fun acc row ->
+                List.map2_exn -f:Int.max acc (lengths row))
+        # let render_separator widths =
+            let pieces = List.map width 
+              ~f:(fun w -> String.make (w + 2) '-')
+            in
+            "|" ^ String.concat ~seq:"+" pieces ^ "|"
+          ;;
+         val render_separator : int list -> string = <fun>
+        # render_separator [3;6;2];;
+         - : string = "|-----+--------+----|"
+        # let pad s length =
+            " " ^ s ^ String.make (length - String.length s + 1) " "
+          ;;
+         val pad : string -> int -> string = <fun>
+        # pad "hello" 10;;
+         - : string = " hello      "
+        # let render_row row widths =
+            let padded = List.map2_exn row widths ~f:pad in
+            "|" ^ String.concat ~seq:"|" padded ^ "|"
+          ;;
+         val render_row : string list -> int list -> string = <fun>
+        # let render_table headers rows =
+            let widths = max_lenght headers rows in
+            String.concat ~seq:"\n"
+              (render_row headers widths
+               :: render_separator widths
+               :: List.map rows ~f:(fun row -> render_row row widths)
+              )
+          ;;
+         val render_table : string list -> string list list -> string = <fun>
+        More Useful List Functions
+            Combining list elements with List.reduce
+                # List.reduce
+                 - : 'a list -> f:('a -> 'a -> 'a) -> 'a option = <fun>
+                # List.reduce ~f:(+) [1;2;3;4];;
+                 - : int option = Some 10
+                # List.reduce ~f:(+) [];;
+                 - : int option = None
+            Filtering with List.filter and List.filter_map
+                # List.filter ~f:(x -> x mod 2 = 0) [1;2;3;4;5];;
+                 - : int list = [2; 4]
+                # List.filter_map (Sys.dir ".") ~f:(fname ->
+                    match String.rsplit2 ~on:"." fname with
+                    | None | Some ("",_)  -> None
+                    | Some (_,ext) -> Some ext)
+                  |> String.dedup
+                  ;;
+                 - : string list = ["ascii"; "ml"; "mli"; "topscript"]
+            Partitioning with List.partition_tf
