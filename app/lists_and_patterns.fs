@@ -222,3 +222,137 @@ Chapter 3. Lists and Patterns
                   ;;
                  - : string list = ["ascii"; "ml"; "mli"; "topscript"]
             Partitioning with List.partition_tf
+                # let is_ocaml_source s =
+                    match String.rsplit2 s ~on:"." with
+                    | Some (_,("mi"|"mli")) -> true
+                    | _ -> false
+                  ;;
+                 val is_ocaml_source : string -> bool = <fun>
+                # let (ml_files,other_files) =
+                    List.partition_tf (Sys.ls_dir ".") ~f:is_ocaml_source;;
+                 val ml_files : string list = ["exmaple.ml"; "exmaple.mli"]
+                 val other_files : string list = ["list_layout.ascii"; "main.topscript"]
+            Combining lists
+                # List.append [1;2;3] [4;5;6]
+                 - : int list = [1; 2; 3; 4; 5; 6]
+                # [1;2;3] @ [3;4;5]
+                 - : int list = [1; 2; 3; 4; 5; 6]
+                # List.concat [[1;2];[3;4;5];[6];[]];;
+                 - : int list = [1; 2; 3; 4; 5; 6]
+                # let rec ls_rec s =
+                    if Sys.is_file_exn ~follow_symlinks:true s
+                    then [s]
+                    else
+                      Sys.ls_dir s
+                      |> List.map ~f:(fun sub -> ls_rec (s ^/ sub))
+                      |> List.concat
+                  ;;
+                 val ls_rec : string -> string list = <fun>
+                # let rec ls_rec s =
+                    if Sys.is_file_exn ~follow_symlinks:true s
+                    then [s]
+                    else
+                      Sys.ls_dir s
+                      |> List.concat_map ~f:(fun sub -> ls_rec (s ^/ sub))
+                  ;;
+                 val ls_rec : string -> string list = <fun>
+    TAIL RECURSION
+        # let rec length = function
+            | [] -> 0
+            | _ :: tl -> 1 + length tl
+          ;;
+         val length : 'a list -> int = <fun>
+        # length [1;2;3];;
+         - : int = 3
+        # let make_list n = List.init n ~f:(fun x -> x);;
+         val make_list : int -> int list = <fun>
+        # length (make_list 10);;
+         - : int = 10
+        # length (make_list 10_000_000);;
+         Stack overflow during evaluation (looping recursion?).
+        # let rec length_plus_n l n =
+            match l with
+            | [] -> n
+            | _ :: tl -> length_plus_n tl (n + 1)
+          ;;
+         val length_plus_n : 'a list -> int -> int = <fun>
+        # let length l = length_plus_n l 0 ;;
+         val length : 'a list -> int = <fun>
+        # length [1;2;3;4];;
+         - : int = 4
+        # length (make_list 10_000_000);;
+         - : int = 10000000
+    TERSER AND FASTER PATTERNS
+        # let rec destutter list =
+            match list with
+            | [] -> []
+            | [hd] -> [hd]
+            | hd :: hd' :: tl ->
+              if hd = hd' then destutter (hd' :: tl)
+              else hd :: destutter (hd' :: tl)
+          ;;
+         val destutter : 'a list -> 'a list = <fun>
+        # let rec destutter list = function
+            | [] as l -> l
+            | [_] as l -> l
+            | hd :: (hd' :: _ as tl) ->
+              if hd = hd' then destutter tl
+              else hd :: destutter tl
+          ;;
+         val destutter : 'a list -> 'a list = <fun>
+        # let rec destutter list = function
+            | [] | [_] as l -> l
+            | hd :: (hd' :: _ as tl) ->
+              if hd = hd' then destutter tl
+              else hd :: destutter tl
+          ;;
+         val destutter : 'a list -> 'a list = <fun>
+        # let rec destutter = function
+            | [] | [_] as l -> l
+            | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
+            | hd :: tl -> hd :: destutter tl
+          ;;
+         val destutter : 'a list -> 'a list = <fun>
+    Polymorphic Compare
+        # 3 = 4;;
+         - : bool = false
+        # [3;4;5] = [3;4;5];;
+         - : bool = true
+        # [Some 3; None] = [None; Some 3];;
+         - : bool = false
+        # (=);;
+         - : 'a -> 'a -> bool = <fun>
+        # (fun x -> x + 1) = (fun x -> x + 1);;
+         Exception: (Invalid_argument "equal: functional value").
+        # let rec count_some list =
+            match list with
+            | [] -> 0
+            | x :: tl when Option.is_none x -> count_some tl
+            | x :: tl when Option.is_some x -> 1 + count_some tl
+          ;;
+
+
+         Characters 30-169:
+         Warning 8: this pattern-matching is not exhaustive.
+         Here is an example of a value that is not matched:
+         _::_
+         (However, some guarded clause may match this value.)val count_some : 'a option list -> int = <fun>
+        # count_some [Some 3; None; Some 4];;
+         - : int = 2
+        # let rec count_some list =
+            match list with
+            | [] -> 0
+            | x :: tl when Option.is_none x -> count_some tl
+            | x :: tl when Option.is_some x -> 1 + count_some tl
+            | x :: tl -> -1 (* unreachable *)
+          ;;
+         val count_some : 'a option list -> int = <fun>
+        # let rec count_some list =
+            match list with
+            | [] -> 0
+            | x :: tl when Option.is_none x -> count_some tl
+            | _ :: tl -> 1 + count_some tl
+          ;;
+         val count_some : 'a option list -> int = <fun>
+        # let count_some l = List.count ~f:Option.is_some l;;
+         val count_some : 'a option list -> int = <fun>
