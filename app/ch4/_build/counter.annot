@@ -1,0 +1,149 @@
+"counter.ml" 3 15 19 "counter.ml" 3 15 24
+type(
+  ('a, int) List.Assoc.t -> 'a -> ('a, int) List.Assoc.t
+)
+ident(
+  def touch "counter.ml" 9 119 151 "counter.ml" 1 0 -1
+)
+"counter.ml" 3 15 25 "counter.ml" 3 15 26
+type(
+  ('a, int) List.Assoc.t
+)
+ident(
+  def t "counter.ml" 3 15 27 "counter.ml" 9 119 151
+)
+"counter.ml" 3 15 27 "counter.ml" 3 15 28
+type(
+  'a
+)
+ident(
+  def s "counter.ml" 4 31 33 "counter.ml" 9 119 151
+)
+"counter.ml" 4 31 37 "counter.ml" 4 31 42
+type(
+  int
+)
+ident(
+  def count "counter.ml" 9 119 121 "counter.ml" 9 119 151
+)
+"counter.ml" 5 45 55 "counter.ml" 5 45 70
+type(
+  ('a, int) List.Assoc.t -> ?equal:('a -> 'a -> bool) -> 'a -> int option
+)
+ident(
+  ext_ref Core.Std.List.Assoc.find
+)
+"counter.ml" 5 45 71 "counter.ml" 5 45 72
+type(
+  ('a, int) List.Assoc.t
+)
+ident(
+  int_ref t "counter.ml" 3 15 25 "counter.ml" 3 15 26
+)
+"counter.ml" 5 45 73 "counter.ml" 5 45 74
+type(
+  'a
+)
+ident(
+  int_ref s "counter.ml" 3 15 27 "counter.ml" 3 15 28
+)
+"counter.ml" 5 45 55 "counter.ml" 5 45 74
+call(
+  stack
+)
+type(
+  int option
+)
+"counter.ml" 6 80 86 "counter.ml" 6 80 90
+type(
+  int option
+)
+"counter.ml" 6 80 94 "counter.ml" 6 80 95
+type(
+  int
+)
+"counter.ml" 7 96 107 "counter.ml" 7 96 108
+type(
+  int
+)
+ident(
+  def x "counter.ml" 7 96 112 "counter.ml" 7 96 113
+)
+"counter.ml" 7 96 102 "counter.ml" 7 96 108
+type(
+  int option
+)
+"counter.ml" 7 96 112 "counter.ml" 7 96 113
+type(
+  int
+)
+ident(
+  int_ref x "counter.ml" 7 96 107 "counter.ml" 7 96 108
+)
+"counter.ml" 5 45 49 "counter.ml" 7 96 113
+type(
+  int
+)
+"counter.ml" 9 119 121 "counter.ml" 9 119 135
+type(
+  ('a, int) List.Assoc.t ->
+  ?equal:('a -> 'a -> bool) -> 'a -> int -> ('a, int) List.Assoc.t
+)
+ident(
+  ext_ref Core.Std.List.Assoc.add
+)
+"counter.ml" 9 119 136 "counter.ml" 9 119 137
+type(
+  ('a, int) List.Assoc.t
+)
+ident(
+  int_ref t "counter.ml" 3 15 25 "counter.ml" 3 15 26
+)
+"counter.ml" 9 119 138 "counter.ml" 9 119 139
+type(
+  'a
+)
+ident(
+  int_ref s "counter.ml" 3 15 27 "counter.ml" 3 15 28
+)
+"counter.ml" 9 119 141 "counter.ml" 9 119 146
+type(
+  int
+)
+ident(
+  int_ref count "counter.ml" 4 31 37 "counter.ml" 4 31 42
+)
+"counter.ml" 9 119 147 "counter.ml" 9 119 148
+type(
+  int -> int -> int
+)
+ident(
+  ext_ref Pervasives.( + )
+)
+"counter.ml" 9 119 149 "counter.ml" 9 119 150
+type(
+  int
+)
+"counter.ml" 9 119 141 "counter.ml" 9 119 150
+type(
+  int
+)
+"counter.ml" 9 119 121 "counter.ml" 9 119 151
+call(
+  tail
+)
+type(
+  ('a, int) List.Assoc.t
+)
+"counter.ml" 4 31 33 "counter.ml" 9 119 151
+type(
+  ('a, int) List.Assoc.t
+)
+"counter.ml" 3 15 27 "counter.ml" 9 119 151
+type(
+  'a -> ('a, int) List.Assoc.t
+)
+"counter.ml" 3 15 25 "counter.ml" 9 119 151
+type(
+  ('a, int) List.Assoc.t -> 'a -> ('a, int) List.Assoc.t
+)
