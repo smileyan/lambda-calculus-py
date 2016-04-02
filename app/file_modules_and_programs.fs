@@ -103,3 +103,66 @@
         
         let sessions_have_same_user s1 s2 =
           s1.user = s2.host
+    OPENING MODULES
+        Most of the time, you refer to values and types within a module by using the module name as an explicit qualifier.
+        For example, you write List.map to refer to the map function in the List module.
+        Sometimes, though, you want to be able to refer to the contents of a module without this explicit qualification.
+        That's what the open statement is for.
+
+        We've encountered open already, specifically where we've written open Core.Std to get access to the standard
+        definitions in the Core library. In general, opening a module adds the contents of that module to the
+        environment that the compiler looks at to find the definition of various identifiers. Here's an example:
+
+            # module M = struct let foo = 3 end;;
+             module M : sig val foo : int end
+            # foo;;
+             Characters -1-3:
+             Error: Unbound value foo
+            # open M;;
+            
+            # foo
+             - : int = 3
+        open is essential when you want to modify your environment for a standard library like Core,
+        but it's generally good style to keep the opening of modules to a minimum.
+        Opening a module is basically a trade-off between terseness and explicitness—the more modules you open,
+        the fewer module qualifications you need, and the harder it is to look at an identifier and figure out
+        where it comes from.
+
+        Here's some general advice on how to deal with opens:
+
+        Opening modules at the toplevel of a module should be done quite sparingly, and generally only with
+        modules that have been specifically designed to be opened, like Core.Std or Option.Monad_infix.
+
+        If you do need to do an open, it's better to do a local open. There are two syntaxes for local opens.
+        For example, you can write:
+            # let average x y =
+                let open Int64 in
+                x + y / int_of 2 ;;
+             val average : int64 -> int64 -> int64 = <fun>
+        An alternative to local opens that makes your code terser without giving up on explicitness is to 
+        locally rebind the name of a module. So, when using the Counter.median type, instead of writing:
+            # let print_median m =
+                match m with
+                | Counter.Median string -> printf "True median:\n   %s\n" string
+                | Counter.Before_and_after (before, after) ->
+                  printf "Before and after median:\n   %s\n   %s\n" before after
+
+            # let print_median m =
+                let module C = Counter in
+                match m with
+                | C.Median string -> printf "True median:\n   %s\n" string
+                | C.Before_and_after (before, after) ->
+                  printf "Before and after median:\n   %s\n   %s\n" before after
+    INCLUDING MODULES
+        While opening a module affects the environment used to search for identifiers, 
+        including a module is a way of actually adding new identifiers to a module proper. 
+        Consider the following simple module for representing a range of integer values:
+            # module Interval = struct
+                type t = | Interval of int * int
+                         | Empty
+
+                let create low high =
+                  if low > high then Empty else Interval (low,high)
+              end;;
+             module Interval:
+               sig type t = Interval of int * int | Empty var create : int -> int -> t end
