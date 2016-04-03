@@ -166,3 +166,43 @@
               end;;
              module Interval:
                sig type t = Interval of int * int | Empty var create : int -> int -> t end
+
+        We can use the include directive to create a new, extended version of the Interval module:
+        
+         # module Extended_interval = struct
+             include Interval
+    
+             let contains t x =
+              match x with
+              | Empty -> false
+              | Interval (low,high) -> x >= low && x <= high
+           end;;
+          module Extended_interval : 
+            sig
+              type t = Interval.t = Interval int * int | Empty
+              val create : int * int -> t
+              val contains : t * int -> bool
+            end
+         # Extended_interval.contains (Extended_interval.create 3 10) 4;;
+          - : bool = true
+        
+        The difference between include and open is that we've done more than change how identifiers are searched for: 
+        we've changed what's in the module. If we'd used open, we'd have gotten a quite different result:
+
+            # module Extended_interval = struct
+                open Interval
+
+                let contains t x =
+                  match t with
+                  | Empty -> false
+                  | Interval (low,high) -> x >= low && x <= high
+              end;;
+             module Extended_interval :
+               sig val contains : Extended_interval.t -> int -> bool end
+            # Extended_interval.contains (Extended_interval.create 3 10) 4;;
+             Characters 28-52:
+             Error: Unbound value Extended_interval.create
+        To consider a more realistic example, imagine you wanted to build an extended version of the List module, 
+        where you've added some functionality not present in the module as distributed in Core. 
+        include allows us to do just that:
+            ext_list.ml
