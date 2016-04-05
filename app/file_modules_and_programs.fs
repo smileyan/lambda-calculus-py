@@ -206,3 +206,42 @@
         where you've added some functionality not present in the module as distributed in Core. 
         include allows us to do just that:
             ext_list.ml
+                # open Core.Std
+                (* The new function we're going to add *)
+                let rec intersperse list el =
+                  match list with
+                  | [] | [ _ ] -> list
+                  | x :: y :: tl -> x :: el :: intersperse (y::tl) el
+                (* The remainder of the list module *)
+                include List
+        Now, how do we write an interface for this new module? It turns out that include works on signatures as well, 
+        so we can pull essentially the same trick to write our mli. The only issues is that we need to get our hands
+        on the signature for the List module. This can be done using module type of, which computes a signature from a module:
+            ext_list.mli
+                open Core.Std
+                
+                (* Include the interface of the list module from Core *)
+                include (module type of list)
+                
+                (* Signature of function we're adding *)
+                val intersperse : 'a list -> 'a -> 'a list
+        Note that the order of declarations in the mli does not need to match the order of declarations in the ml. 
+        The order of declarations in the ml mostly matters insofar as it affects which values are shadowed.
+        If we wanted to replace a function in List with a new function of the same name,
+        the declaration of that function in the ml would have to come after the include List declaration.
+
+        We can now use Ext_list as a replacement for List.
+        If we want to use Ext_list in preference to List in our project, we can create a file of common definitions:
+
+            common.ml
+                module list = Ext_list
+        And if we then put open Common after open Core.Std at the top of each file in our project, then references to List will automatically go to Ext_list instead. 
+
+    COMMON ERRORS WITH MODULES
+            When OCaml compiles a program with an ml and an mli, it will complain if it detects a mismatch between the two. Here are some of the common errors you'll run into.
+        Type Mismatches
+            The simplest kind of error is where the type specified in the signature does not match the type in the implementation of the module.
+            As an example, if we replace the val declaration in counter.mli by swapping the types of the first two arguments:
+
+
+
