@@ -242,6 +242,8 @@
         Type Mismatches
             The simplest kind of error is where the type specified in the signature does not match the type in the implementation of the module.
             As an example, if we replace the val declaration in counter.mli by swapping the types of the first two arguments:
+                (** Bump the frequency count for the given string. *)
+                val touch : string -> t -> t
 
 
 
