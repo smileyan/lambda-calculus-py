@@ -244,6 +244,44 @@
             As an example, if we replace the val declaration in counter.mli by swapping the types of the first two arguments:
                 (** Bump the frequency count for the given string. *)
                 val touch : string -> t -> t
+            and we try to compile, we'll get the following error:
+                corebuild freq.byte
+        Missing Definitions
+            We might decide that we want a new function in Counter for pulling out the frequency count of a given string. We can update the mli by adding the following line:
+                val count : t -> string -> int
+            Now, if we try to compile without actually adding the implementation, we'll get this error:
+                $ corebuild freq.byte
+                 File "counter.ml", line 1:
+                 Error: The implementation counter.ml
+                        does not match the interface counter.cmi:
+                        The field `count' is required but not provided
+                 Command exited with code 2.
+            A missing type definition will lead to a similar error.
+        Type Definition Mismatches
+            Type definitions that show up in an mli need to match up with corresponding definitions in the ml.
+            Consider again the example of the type median. The order of the declaration of variants matters to the OCaml compiler,
+            so the definition of median in the implementation listing those options in a different order:
+                (** Represents the median computed from a set of strings.  In the case where
+                    there is an even number of choices, the one before and after the median is
+                    returned.  *)
+                type median = | Before_and_after of string * string
+                              | Median of string
+            will lead to a compilation error:
+                $ corebuild freq.byte
+                 File "counter.ml", line 1:
+                 Error: The implementation counter.ml
+                        does not match the interface counter.cmi:
+                        Type declarations do not match:
+                          type median = Median of string | Before_and_after of string * string
+                        is not included in
+                          type median = Before_and_after of string * string | Median of string
+                        File "counter.ml", line 18, characters 5-84: Actual declaration
+                        Fields number 1 have different names, Median and Before_and_after.
+                 Command exited with code 2.
+            Order is similarly important to other type declarations, including the order in which record fields are declared and 
+            the order of arguments (including labeled and optional arguments) to a function.
+        Cyclic Dependencies
+
 
 
 
