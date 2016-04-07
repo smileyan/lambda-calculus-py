@@ -281,6 +281,23 @@
             Order is similarly important to other type declarations, including the order in which record fields are declared and 
             the order of arguments (including labeled and optional arguments) to a function.
         Cyclic Dependencies
+            In most cases, OCaml doesn't allow cyclic dependencies, i.e., a collection of definitions that all refer to one another.
+            If you want to create such definitions, you typically have to mark them specially. For example, when defining a set of 
+            mutually recursive values (like the definition of is_even and is_odd in the section called “Recursive Functions”), you need to define them using let rec rather than ordinary let.
+
+            The same is true at the module level. By default, cyclic dependencies between modules are not allowed, 
+            and cyclic dependencies among files are never allowed. Recursive modules are possible but are a rare case, and we won't discuss them further here.
+
+            The simplest example of a forbidden circular reference is a module referring to its own module name.
+            So, if we tried to add a reference to Counter from within counter.ml:
+
+                let singleton l = Counter.touch Counter.empty
+            we'll see this error when we try to build:
+                $ corebuild freq.byte
+                 File "counter.ml", line 18, characters 18-31:
+                 Error: Unbound module Counter
+                 Command exited with code 2.
+
 
 
 
