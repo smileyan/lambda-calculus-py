@@ -297,6 +297,26 @@
                  File "counter.ml", line 18, characters 18-31:
                  Error: Unbound module Counter
                  Command exited with code 2.
+            The problem manifests in a different way if we create cyclic references between files.
+            We could create such a situation by adding a reference to Freq from counter.ml, e.g., by adding the following line
+                let _build_counts = Freq.build_counts
+            In this case, ocamlbuild (which is invoked by the corebuild script) will notice the error and complain explicitly about the cycle:
+                $ corebuild freq.byte
+                 Circular dependencies: "freq.cmo" already seen in
+                 [ "counter.cmo"; "freq.cmo" ]
+    DESIGNING WITH MODULES
+            The module system is a key part of how an OCaml program is structured.
+            As such, we'll close this chapter with some advice on how to think about designing that structure effectively.
+        Expose Concrete Types Rarely
+            When designing an mli, one choice that you need to make is whether to expose the concrete definition of your types or leave them abstract. 
+            Most of the time, abstraction is the right choice, for two reasons:
+            it enhances the flexibility of your design, and it makes it possible to enforce invariants on the use of your module.
+
+            Abstraction enhances flexibility by restricting how users can interact with your types,
+            thus reducing the ways in which users can depend on the details of your implementation.
+            If you expose types explicitly, then users can depend on any and every detail of the types you choose.
+            If they're abstract, then only the specific operations you want to expose are available.
+            This means that you can freely change the implementation without affecting clients, as long as you preserve the semantics of those operations.
 
 
 
