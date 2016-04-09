@@ -316,8 +316,52 @@
             thus reducing the ways in which users can depend on the details of your implementation.
             If you expose types explicitly, then users can depend on any and every detail of the types you choose.
             If they're abstract, then only the specific operations you want to expose are available.
-            This means that you can freely change the implementation without affecting clients, as long as you preserve the semantics of those operations.
+            This means that you can freely change the implementation without affecting clients, 
+            as long as you preserve the semantics of those operations.
 
+            In a similar way, abstraction allows you to enforce invariants on your types. 
+            If your types are exposed, then users of the module can create new instances of that type 
+            (or if mutable, modify existing instances) in any way allowed by the underlying type. 
+            That may violate a desired invariant i.e., a property about your type that is always supposed to be true. 
+            Abstract types allow you to protect invariants by making sure that you only expose functions 
+            that preserves your invariants.
+
+            Despite these benefits, there is a trade-off here. 
+            In particular, exposing types concretely makes it possible to use pattern-matching with those types, 
+            which as we saw in Chapter 3, Lists and Patterns is a powerful and important tool. 
+            You should generally only expose the concrete implementation of your types 
+            when there's significant value in the ability to pattern match, and 
+            when the invariants that you care about are already enforced by the data type itself.
+        
+        Design for the Call Site
+            When writing an interface, you should think not just about how easy it is 
+            to understand the interface for someone who reads your carefully documented mli file, 
+            but more importantly, you want the call to be as obvious as possible for someone 
+            who is reading it at the call site.
+
+            The reason for this is that most of the time, people interacting with your API will be doing so 
+            by reading and modifying code that uses the API, not by reading the interface definition. 
+            By making your API as obvious as possible from that perspective, you simplify the lives of your users.
+
+            There are many ways of improving readability at the call site. One example is labeled arguments 
+            (discussed in the section called “Labeled Arguments”), which act as documentation that is available at 
+            the call site.
+
+            You can also improve readability simply by choosing good names for your functions, 
+            variant tags and record fields. Good names aren't always long, to be clear. 
+            If you wanted to write an anonymous function for doubling a number: (fun x -> x * 2), a short variable name 
+            like x is best. A good rule of thumb is that names that have a small scope should be short, 
+            whereas names that have a large scope, like the name of a function in an a module interface, 
+            should be longer and more explicit.
+
+            There is of course a tradeoff here, in that making your APIs more explicit tends to make them more 
+            verbose as well. Another useful rule of thumb is that more rarely used names should be longer and 
+            more explicit, since the cost of concision and the benefit of explicitness become more important 
+            the more often a name is used.
+
+        Create Uniform Interfaces
+
+        Interfaces before implementations
 
 
 
