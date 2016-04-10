@@ -74,6 +74,45 @@ Chapter 5. Records
 
     PATTERNS AND EXHAUSTIVENESS
 
+        Another way of getting information out of a record is by using a pattern match, 
+        as in the definition of host_info_to_string:
 
+        # let host_info_to_string { hostname = h; os_name = os;
+                                    cpu_arch = c; timestamp = ts;
+                                  } =
+               sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+         val host_info_to_string : host_info -> string = <fun>
+        # host_info_to_string my_host;;
+         - : string = "flick.local (Darwin / i386, on 2013-11-05 08:49:38)"
+
+        Note that the pattern we used had only a single case, rather than using several cases separated by |'s. 
+        We needed only one pattern because record patterns are irrefutable, 
+        meaning that a record pattern match will never fail at runtime. 
+        This makes sense, because the set of fields available in a record is always the same. 
+        In general, patterns for types with a fixed structure, like records and tuples, are irrefutable, 
+        unlike types with variable structures like lists and variants.
+
+        Another important characteristic of record patterns is that they don't need to be complete; 
+        a pattern can mention only a subset of the fields in the record. 
+        This can be convenient, but it can also be error prone. 
+        In particular, this means that when new fields are added to the record, 
+        code that should be updated to react to the presence of those new fields will not be flagged by the compiler.
+
+        As an example, imagine that we wanted to add a new field to our host_info record called os_release:
+
+            # type host_info =
+                { hostname   : string;
+                  os_name    : string;
+                  cpu_arch   : string;
+                  os_release : string;
+                  timestamp  : Time.t;
+                } ;;
+             type host_info = {
+               hostname : string;
+               os_name : string;
+               cpu_arch : string;
+               os_release : string;
+               timestamp : Time.t;
+             }
 
 
