@@ -115,4 +115,57 @@ Chapter 5. Records
                timestamp : Time.t;
              }
 
+        The code for host_info_to_string would continue to compile without change. In this particular case, 
+        it's pretty clear that you might want to update host_info_to_string in order to include os_release, 
+        and it would be nice if the type system would give you a warning about the change.
+
+        Happily, OCaml does offer an optional warning for missing fields in a record pattern. 
+        With that warning turned on (which you can do in the toplevel by typing #warnings "+9"), the compiler will warn about the missing field:
+
+            # #warnings "+9";;
+ 
+            # let host_info_to_string { hostname = h; os_name = os;
+                                        cpu_arch = c; timestamp = ts;
+                                      } =
+                sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+
+
+             Characters 24-139:
+             Warning 9: the following labels are not bound in this record pattern:
+             os_release
+             Either bind these labels explicitly or add '; _' to the pattern.val host_info_to_string : host_info -> string = <fun>
+
+        We can disable the warning for a given pattern by explicitly acknowledging that we are ignoring extra fields. This is done by adding an underscore to the pattern:
+
+        # let host_info_to_string { hostname = h; os_name = os;
+                                    cpu_arch = c; timestamp = ts; _
+                                  } =
+            sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+         val host_info_to_string : host_info -> string = <fun>
+
+            Compiler Warnings
+                The OCaml compiler is packed full of useful warnings that can be enabled and disabled separately. 
+                These are documented in the compiler itself, so we could have found out about warning 9 as follows:
+
+                $ ocaml -warn-help | egrep '\b9\b'
+                    9 Missing fields in a record pattern.
+                    R Synonym for warning 9.
+
+        You should think of OCaml's warnings as a powerful set of optional static analysis tools, 
+        and you should eagerly enable them in your build environment. You don't typically enable all warnings, 
+        but the defaults that ship with the compiler are pretty good.
+
+        The warnings used for building the examples in this book are specified with the following flag: -w @A-4-33-41-42-43-34-44.
+
+        The syntax of this can be found by running ocaml -help, but this particular invocation turns on all warnings as errors, 
+        disabling only the numbers listed explicitly after the A.
+
+        Treating warnings as errors (i.e., making OCaml fail to compile any code that triggers a warning) is good practice, 
+        since without it, warnings are too often ignored during development. When preparing a package for distribution, however, 
+        this is a bad idea, since the list of warnings may grow from one release of the compiler to another, 
+        and so this may lead your package to fail to compile on newer compiler releases.
+
+
+
+
 
