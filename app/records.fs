@@ -165,6 +165,61 @@ Chapter 5. Records
         this is a bad idea, since the list of warnings may grow from one release of the compiler to another, 
         and so this may lead your package to fail to compile on newer compiler releases.
 
+    FIELD PUNNING
+
+        When the name of a variable coincides with the name of a record field, OCaml provides some handy syntactic shortcuts. 
+        For example, the pattern in the following function binds all of the fields in question to variables of the same name. This is called field punning:
+            # let host_info_to_string { hostname; os_name; cpu_arch; timestamp; _ } =
+                sprintf "%s (%s / %s) <%s>" hostname os_name cpu_arch
+                  (Time.to_string timestamp);;
+             val host_info_to_string : host_info -> string = <fun>
+
+        Field punning can also be used to construct a record. Consider the following code for generating a host_info record:
+
+            # let my_host =
+                let sh cmd = Shell.sh_one_exn cmd in
+                let hostname   = sh "hostname" in
+                let os_name    = sh "uname -s" in
+                let cpu_arch   = sh "uname -p" in
+                let os_release = sh "uname -r" in
+                let timestamp  = Time.now () in
+                { hostname; os_name; cpu_arch; os_release; timestamp };;
+             val my_host : host_info =
+               {hostname = "flick.local"; os_name = "Darwin"; cpu_arch = "i386";
+                os_release = "13.0.0"; timestamp = 2013-11-05 08:49:41.499579-05:00}
+
+        In the preceding code, we defined variables corresponding to the record fields first, 
+        and then the record declaration itself simply listed the fields that needed to be included.
+
+        You can take advantage of both field punning and label punning when writing a function for constructing a record from labeled arguments:
+
+            # let create_host_info ~hostname ~os_name ~cpu_arch ~os_release =
+                { os_name; cpu_arch; os_release;
+                  hostname = String.lowercase hostname;
+                  timestamp = Time.now () };;
+             val create_host_info :
+               hostname:string ->
+               os_name:string -> cpu_arch:string -> os_release:string -> host_info = <fun>
+
+        This is considerably more concise than what you would get without punning:
+
+            # let create_host_info
+                ~hostname:hostname ~os_name:os_name
+                ~cpu_arch:cpu_arch ~os_release:os_release =
+                { os_name = os_name;
+                  cpu_arch = cpu_arch;
+                  os_release = os_release;
+                  hostname = String.lowercase hostname;
+                  timestamp = Time.now () };;
+             val create_host_info :
+               hostname:string ->
+               os_name:string -> cpu_arch:string -> os_release:string -> host_info = <fun>
+
+        Together, labeled arguments, field names, and field and label punning encourage a style 
+        where you propagate the same names throughout your codebase. This is generally good practice, 
+        since it encourages consistent naming, which makes it easier to navigate the source.
+
+    REUSING FIELD NAMES
 
 
 
