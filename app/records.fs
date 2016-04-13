@@ -221,6 +221,133 @@ Chapter 5. Records
 
     REUSING FIELD NAMES
 
+        Defining records with the same field names can be problematic. 
+        Let's consider a simple example: building types to represent the protocol used for a logging server.
+
+        We'll describe three message types: log_entry, heartbeat, and logon. 
+        The log_entry message is used to deliver a log entry to the server; the logon message is sent to initiate a connection and 
+        includes the identity of the user connecting and credentials used for authentication; 
+        and the heartbeat message is periodically sent by the client to demonstrate to the server that the client is alive and connected. 
+        All of these messages include a session ID and the time the message was generated:
+
+            # type log_entry =
+                { session_id: string;
+                  time: Time.t;
+                  important: bool;
+                  message: string;
+                }
+              type heartbeat =
+                { session_id: string;
+                  time: Time.t;
+                  status_message: string;
+                }
+              type logon =
+                { session_id: string;
+                  time: Time.t;
+                  user: string;
+                  credentials: string;
+                }
+            ;;
+             type log_entry = {
+               session_id : string;
+               time : Time.t;
+               important : bool;
+               message : string;
+             }
+             type heartbeat = {
+               session_id : string;
+               time : Time.t;
+               status_message : string;
+             }
+             type logon = {
+               session_id : string;
+               time : Time.t;
+               user : string;
+               credentials : string;
+             }
+
+        Reusing field names can lead to some ambiguity. For example, if we want to write a function to grab the session_id from a record, what type will it have?
+
+            # let get_session_id t = t.session_id;;
+                val get_session_id : logon -> string = <fun>
+
+        In this case, OCaml just picks the most recent definition of that record field. 
+        We can force OCaml to assume we're dealing with a different type (say, a heartbeat) using a type annotation:
+
+            # let get_heartbeat_session_id (t:heartbeat) = t.session_id;;
+             val get_heartbeat_session_id : heartbeat -> string = <fun>
+
+        While it's possible to resolve ambiguous field names using type annotations, the ambiguity can be a bit confusing. 
+        Consider the following functions for grabbing the session ID and status from a heartbeat:
+
+            # let status_and_session t = (t.status_message, t.session_id);;
+             val status_and_session : heartbeat -> string * string = <fun>
+            # let session_and_status t = (t.session_id, t.status_message);;
+             Characters 44-58:
+             Error: The record type logon has no field status_message
+            # let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
+             val session_and_status : heartbeat -> string * string = <fun>
+
+        Why did the first definition succeed without a type annotation and the second one fail? 
+        The difference is that in the first case, the type-checker considered the status_message field first and thus concluded that the record was a heartbeat. 
+        When the order was switched, the session_id field was considered first, and so that drove the type to be considered to be a logon, at which point t.status_message no longer made sense.
+
+        We can avoid this ambiguity altogether, either by using nonoverlapping field names or, more generally, 
+        by minting a module for each type. Packing types into modules is a broadly useful idiom (and one used quite extensively by Core), 
+        providing for each type a namespace within which to put related values. When using this style, 
+        it is standard practice to name the type associated with the module t. Using this style we would write:
+
+            # module Log_entry = struct
+                type t =
+                  { session_id: string;
+                    time: Time.t;
+                    important: bool;
+                    message: string;
+                  }
+              end
+              module Heartbeat = struct
+                type t =
+                  { session_id: string;
+                    time: Time.t;
+                    status_message: string;
+                  }
+              end
+              module Logon = struct
+                type t =
+                  { session_id: string;
+                    time: Time.t;
+                    user: string;
+                    credentials: string;
+                  }
+              end;;
+             module Log_entry :
+               sig
+                 type t = {
+                   session_id : string;
+                   time : Time.t;
+                   important : bool;
+                   message : string;
+                 }
+               end
+             module Heartbeat :
+               sig
+                 type t = { session_id : string; time : Time.t; status_message : string; }
+               end
+             module Logon :
+               sig
+                 type t = {
+                 session_id : string;
+                 time : Time.t;
+                 user : string;
+                 credentials : string;
+               }
+             end
+
+    Functional Updates
+
+    Mutable Fields
+
+    First-Class Fields
 
 
 
