@@ -342,9 +342,77 @@ Chapter 5. Records
                  credentials : string;
                }
              end
+        Now, our log-entry-creation function can be rendered as follows:
+
+            # let create_log_entry ~session_id ~important message =
+                 { Log_entry.time = Time.now (); Log_entry.session_id;
+                   Log_entry.important; Log_entry.message }
+             ;;
+             val create_log_entry :
+               session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+
+        The module name Log_entry is required to qualify the fields, because this function is outside of the Log_entry module 
+        where the record was defined. OCaml only requires the module qualification for one record field, 
+        however, so we can write this more concisely. Note that we are allowed to insert whitespace between the module path and the field name:
+
+            # let create_log_entry ~session_id ~important message =
+                { Log_entry.
+                time = Time.now (); session_id; important; message }
+             ;;
+             val create_log_entry :
+              session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+
+        This is not restricted to constructing a record; we can use the same trick when pattern matching:
+
+            # let message_to_string { Log_entry.important; message; _ } =
+                if important then String.uppercase message else message
+              ;;
+             val message_to_string : Log_entry.t -> string = <fun>
+
+        When using dot notation for accessing record fields, we can qualify the field by the module directly:
+
+            # let is_important t = t.Log_entry.important;;
+             val is_important : Log_entry.t -> bool = <fun>
+
+        The syntax here is a little surprising when you first encounter it. 
+        The thing to keep in mind is that the dot is being used in two ways: 
+        the first dot is a record field access, with everything to the right of the dot being interpreted as a field name; 
+        the second dot is accessing the contents of a module, referring to the record field important from within the module Log_entry. 
+        The fact that Log_entry is capitalized and so can't be a field name is what disambiguates the two uses.
+
+        For functions defined within the module where a given record is defined, the module qualification goes away entirely.
+
 
     Functional Updates
 
+        Fairly often, you will find yourself wanting to create a new record that differs from an existing record in only a subset of the fields. 
+        For example, imagine our logging server had a record type for representing the state of a given client, including when the last heartbeat was received from that client. 
+        The following defines a type for representing this information, as well as a function for updating the client information when a new heartbeat arrives:
+
+            # type client_info =
+                { addr: Unix.Inet_addr.t;
+                  port: int;
+                  user: string;
+                  credentials: string;
+                  last_heartbeat_time: Time.t;
+                };;
+             type client_info = {
+               addr : UnixLabels.inet_addr;
+               port : int;
+               user : string;
+               credentials : string;
+               last_heartbeat_time : Time.t;
+             }
+            # let register_heartbeat t hb =
+                { addr = t.addr;
+                  port = t.port;
+                  user = t.user;
+                  credentials = t.credentials;
+                  last_heartbeat_time = hb.Heartbeat.time;
+                };;
+             val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
+ 
+ 
     Mutable Fields
 
     First-Class Fields
