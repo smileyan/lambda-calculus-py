@@ -461,7 +461,119 @@ Chapter 5. Records
          val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
     Mutable Fields
 
+        Like most OCaml values, records are immutable by default. You can, however, 
+        declare individual record fields as mutable. In the following code, 
+        we've made the last two fields of client_info mutable:
+
+            # type client_info =
+                { addr: Unix.Inet_addr.t;
+                  port: int;
+                  user: string;
+                  credentials: string;
+                  mutable last_heartbeat_time: Time.t;
+                  mutable last_heartbeat_status: string;
+                };;
+              type client_info = {
+                addr : UnixLabels.inet_addr;
+                port : int;
+                user : string;
+                credentials : string;
+                mutable last_heartbeat_time : Time.t;
+                mutable last_heartbeat_status : string;
+              }
+
+        The <- operator is used for setting a mutable field. 
+        The side-effecting version of register_heartbeat would be written as follows:
+
+            # let register_heartbeat t hb =
+                t.last_heartbeat_time   <- hb.Heartbeat.time;
+                t.last_heartbeat_status <- hb.Heartbeat.status_message
+              ;;
+             val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
+
+        Note that mutable assignment, and thus the <- operator, is not needed for initialization 
+        because all fields of a record, including mutable ones, are specified when the record is created.
+
+        OCaml's policy of immutable-by-default is a good one, but 
+        imperative programming is an important part of programming in OCaml. 
+        We go into more depth about how (and when) to use OCaml's imperative features in the section 
+        called “Imperative Programming”.
+
     First-Class Fields
+
+        Consider the following function for extracting the usernames from a list of Logon messages:
+
+            # let get_users logons =
+                List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
+             val get_users : Logon.t list -> string list = <fun>
+
+        Here, we wrote a small function (fun x -> x.Logon.user) to access the user field. 
+        This kind of accessor function is a common enough pattern that it would be convenient 
+        to generate it automatically. The fieldslib syntax extension that ships with Core does just that.
+
+        The with fields annotation at the end of the declaration of a record type will cause 
+        the extension to be applied to a given type declaration. 
+        So, for example, we could have defined Logon as follows:
+
+            # module Logon = struct
+                type t =
+                  { session_id: string;
+                    time: Time.t;
+                    user: string;
+                    credentials: string;
+                  }
+                with fields
+              end;;
+
+             module Logon :
+               sig
+                 type t = {
+                   session_id : string;
+                   time : Time.t;
+                   user : string;
+                   credentials : string;
+                 }
+                 val credentials : t -> string
+                 val user : t -> string
+                 val time : t -> Time.t
+                 val session_id : t -> string
+                 module Fields :
+                   sig
+                     val names : string list
+                     val credentials :
+                       ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
+                     val user :
+                       ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
+                     val time :
+                       ([< `Read | `Set_and_create ], t, Time.t) Field.t_with_perm
+                     val session_id :
+                       ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
+
+                     [ ... many definitions omitted ... ]
+
+                   end
+               
+               end
+
+        Note that this will generate a lot of output because fieldslib generates a large collection of helper functions
+        for working with record fields. We'll only discuss a few of these; 
+        you can learn about the remainder from the documentation that comes with fieldslib.
+
+        One of the functions we obtain is Logon.user, which we can use to extract the user field from a logon message:
+
+            # let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
+             val get_users : Logon.t list -> string list = <fun>
+
+        In addition to generating field accessor functions, fieldslib also creates a submodule called Fields 
+        that contains a first-class representative of each field, in the form of a value of type Field.t. 
+        The Field module provides the following functions:
+
+
+
+
+
+
+
 
 
 
