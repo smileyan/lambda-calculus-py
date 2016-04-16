@@ -411,8 +411,54 @@ Chapter 5. Records
                   last_heartbeat_time = hb.Heartbeat.time;
                 };;
              val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
+
+        This is fairly verbose, given that there's only one field that we actually want to change, and all the others are just being copied over from t. 
+        We can use OCaml's functional update syntax to do this more tersely. The syntax of a functional update is as follows:
+
+            { <record> with <field> = <value>;
+                            <field> = <value>;
+                            ...
+            }
  
+        The purpose of the functional update is to create a new record based on an existing one, with a set of field changes layered on top.
+
+        Given this, we can rewrite register_heartbeat more concisely:
+
+            # let register_heartbeat t hb =
+                { t with last_heartbeat_time = hb.Heartbeat.time };;
+             val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
  
+        Functional updates make your code independent of the identity of the fields in the record that are not changing. 
+        This is often what you want, but it has downsides as well. In particular, if you change the definition of your record to have more fields, 
+        the type system will not prompt you to reconsider whether your code needs to change to accommodate the new fields. 
+        Consider what happens if we decided to add a field for the status message received on the last heartbeat:
+
+            # type client_info =
+                { addr: Unix.Inet_addr.t;
+                    port: int;
+                    user: string;
+                    credentials: string;
+                    last_heartbeat_time: Time.t;
+                    last_heartbeat_status: string;
+                };;
+              type client_info = {
+                addr : UnixLabels.inet_addr;
+                port : int;
+                user : string;
+                credentials : string;
+                last_heartbeat_time : Time.t;
+                last_heartbeat_status : string;
+              }
+
+    The original implementation of register_heartbeat would now be invalid, 
+    and thus the compiler would effectively warn us to think about how to handle this new field. 
+    But the version using a functional update continues to compile as is, even though it incorrectly ignores the new field. The correct thing to do would be to update the code as follows:
+
+        # let register_heartbeat t hb =
+            { t with last_heartbeat_time   = hb.Heartbeat.time;
+                     last_heartbeat_status = hb.Heartbeat.status_message;
+            };;
+         val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
     Mutable Fields
 
     First-Class Fields
