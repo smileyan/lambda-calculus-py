@@ -568,10 +568,35 @@ Chapter 5. Records
         that contains a first-class representative of each field, in the form of a value of type Field.t. 
         The Field module provides the following functions:
 
+            Field.name
+            Returns the name of a field
 
+            Field.get
+            Returns the content of a field
 
+            Field.fset
+            Does a functional update of a field
 
+            Field.setter
+            Returns None if the field is not mutable or Some f if it is, 
+            where f is a function for mutating that field
 
+        A Field.t has two type parameters: the first for the type of the record, and the second for the type of the field 
+        in question. Thus, the type of Logon.Fields.session_id is (Logon.t, string) Field.t, 
+        whereas the type of Logon.Fields.time is (Logon.t, Time.t) Field.t. 
+        Thus, if you call Field.get on Logon.Fields.user, you'll get a function for extracting the user field 
+        from a Logon.t:
+
+            # Field.get Logon.Fields.user;;
+             - : Logon.t -> string = <fun>
+
+        Thus, the first parameter of the Field.t corresponds to the record you pass to get, 
+        and the second parameter corresponds to the value contained in the field, which is also the return type of get.
+
+        The type of Field.get is a little more complicated than you might naively expect from the preceding one:
+
+            # Field.get;;
+             - : ('b, 'r, 'a) Field.t_with_perm -> 'r -> 'a = <fun>
 
 
 
