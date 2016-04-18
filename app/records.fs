@@ -597,7 +597,84 @@ Chapter 5. Records
 
             # Field.get;;
              - : ('b, 'r, 'a) Field.t_with_perm -> 'r -> 'a = <fun>
+        The type is Field.t_with_perm rather than Field.t because fields have a notion of access control that comes up in some special cases 
+        where we expose the ability to read a field from a record, but not the ability to create new records, and so we can't expose functional updates.
 
+        We can use first-class fields to do things like write a generic function for displaying a record field:
+
+            # let show_field field to_string record =
+                let name = Field.name field in
+                let field_string = to_string (Field.get field record) in
+                name ^ ": " ^ field_string
+              ;;
+             val show_field :
+               ('a, 'b, 'c) Field.t_with_perm -> ('c -> string) -> 'b -> string = <fun>
+        This takes three arguments: the Field.t, a function for converting the contents of the field in question to a string, and a record from which the field can be grabbed.
+
+        Here's an example of show_field in action:
+
+            # let logon = { Logon.
+                            session_id = "26685";
+                            time = Time.now ();
+                            user = "yminsky";
+                            credentials = "Xy2d9W"; }
+              ;;
+             val logon : Logon.t =
+               {Logon.session_id = "26685"; time = 2013-11-05 08:49:43.946365-05:00;
+                user = "yminsky"; credentials = "Xy2d9W"}
+
+            # show_field Logon.Fields.user Fn.id logon;;
+             - : string = "user: yminsky"
+
+            # show_field Logon.Fields.time Time.to_string logon;;
+             - : string = "time: 2013-11-05 08:49:43.946365-05:00"
+
+        As a side note, the preceding example is our first use of the Fn module (short for "function"), 
+        which provides a collection of useful primitives for dealing with functions. Fn.id is the identity function.
+
+        fieldslib also provides higher-level operators, like Fields.fold and Fields.iter, which let you walk over the fields of a record. 
+        So, for example, in the case of Logon.t, the field iterator has the following type:
+            # Logon.Fields.iter;;
+             - : session_id:(([< `Read | `Set_and_create ], Logon.t, string)
+                             Field.t_with_perm -> 'a) ->
+                 time:(([< `Read | `Set_and_create ], Logon.t, Time.t) Field.t_with_perm
+                       'b) ->
+                 user:(([< `Read | `Set_and_create ], Logon.t, string) Field.t_with_perm
+                       'c) ->
+                 credentials:(([< `Read | `Set_and_create ], Logon.t, string) Field.t_with_perm -> 
+                       'd) -> 'd
+             = <fun>
+
+        This is a bit daunting to look at, largely because of the access control markers, but the structure is actually pretty simple. 
+        Each labeled argument is a function that takes a first-class field of the necessary type as an argument. 
+        Note that iter passes each of these callbacks the Field.t, not the contents of the specific record field. 
+        The contents of the field, though, can be looked up using the combination of the record and the Field.t.
+
+            # let print_logon logon =
+                let print to_string field =
+                  printf "%s\n" (show_field field to_string logon)
+                in
+                Logon.Fields.iter
+                  ~session_id:(print Fn.id)
+                  ~time:(print Time.to_string)
+                  ~user:(print Fn.id)
+                  ~credentials:(print Fn.id)
+              ;;
+             val print_logon : Logon.t -> unit = <fun>
+            # print_logon logon;;
+
+             session_id: 26685
+             time: 2013-11-05 08:49:43.946365-05:00
+             user: yminsky
+             credentials: Xy2d9W
+             - : unit = ()
+
+        One nice side effect of this approach is that it helps you adapt your code when the fields of a record change. 
+        If you were to add a field to Logon.t, the type of Logon.Fields.iter would change along with it, acquiring a new argument. 
+        Any code using Logon.Fields.iter won't compile until it's fixed to take this new argument into account.
+
+        Field iterators are useful for a variety of record-related tasks, from building record-validation functions to scaffolding the definition of a web 
+        form from a record type. Such applications can benefit from the guarantee that all fields of the record type in question have been considered.
 
 
 
