@@ -111,11 +111,128 @@ Chapter 6. Variants
              A muted gray...
 
     CATCH-ALL CASES AND REFACTORING
+        OCaml's type system can act as a refactoring tool, warning you of places where your code needs to be updated to match an interface change. 
+        This is particularly valuable in the context of variants.
+
+        Consider what would happen if we were to change the definition of color to the following:
+
+            # type color =
+              | Basic of basic_color     (* basic colors *)
+              | Bold  of basic_color     (* bold basic colors *)
+              | RGB   of int * int * int (* 6x6x6 color cube *)
+              | Gray  of int             (* 24 grayscale levels *)
+             ;;
+              type color =
+                  Basic of basic_color
+                | Bold of basic_color
+                | RGB of int * int * int
+                | Gray of int
+
+        We've essentially broken out the Basic case into two cases, Basic and Bold, and Basic has changed from having two arguments to one. 
+        color_to_int as we wrote it still expects the old structure of the variant, and 
+        if we try to compile that same code again, the compiler will notice the discrepancy:
+
+            # let color_to_int = function
+                | Basic (basic_color,weight) ->
+                  let base = match weight with Bold -> 8 | Regular -> 0 in
+                  base + basic_color_to_int basic_color
+                | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+                | Gray i -> 232 + i ;;
+             Characters 34-60:
+             Error: This pattern matches values of type 'a * 'b
+                    but a pattern was expected which matches values of type basic_color
+
+        Here, the compiler is complaining that the Basic tag is used with the wrong number of arguments. 
+        If we fix that, however, the compiler flag will flag a second problem, which is that we haven't handled the new Bold tag:
+
+            # let color_to_int = function
+                | Basic basic_color -> basic_color_to_int basic_color
+                | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+                | Gray i -> 232 + i ;;
+
+             Characters 19-154:
+             Warning 8: this pattern-matching is not exhaustive.
+             Here is an example of a value that is not matched:
+             Bold _val color_to_int : color -> int = <fun>
+
+        Fixing this now leads us to the correct implementation:
+
+            # let color_to_int = function
+                | Basic basic_color -> basic_color_to_int basic_color
+                | Bold  basic_color -> 8 + basic_color_to_int basic_color
+                | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+                | Gray i -> 232 + i ;;
+             val color_to_int : color -> int = <fun>
+
+        As we've seen, the type errors identified the things that needed to be fixed to complete the refactoring of the code. 
+        This is fantastically useful, but for it to work well and reliably, you need to write your code in a way that maximizes the compiler's chances of helping you find the bugs. 
+        To this end, a useful rule of thumb is to avoid catch-all cases in pattern matches.
+
+        Here's an example that illustrates how catch-all cases interact with exhaustion checks. 
+        Imagine we wanted a version of color_to_int that works on older terminals by rendering the first 16 colors (the eight basic_colors in regular and bold) in the normal way, 
+        but renders everything else as white. We might have written the function as follows:
+
+            # let oldschool_color_to_int = function
+                | Basic (basic_color,weight) ->
+                  let base = match weight with Bold -> 8 | Regular -> 0 in
+                  base + basic_color_to_int basic_color
+                | _ -> basic_color_to_int White;;
+
+             Characters 44-70:
+             Error: This pattern matches values of type 'a * 'b
+                    but a pattern was expected which matches values of type basic_color
+
+        But because the catch-all case encompasses all possibilities, 
+        the type system will no longer warn us that we have missed the new Bold case when we change the type to include it. 
+        We can get this check back by avoiding the catch-all case, and instead being explicit about the tags that are ignored.
 
 
 
     Combining Records and Variants
 
+        The term algebraic data types is often used to describe a collection of types that includes variants, records, and tuples. 
+        Algebraic data types act as a peculiarly useful and powerful language for describing data. 
+        At the heart of their utility is the fact that they combine two different kinds of types: product types, 
+        like tuples and records, which combine multiple different types together and 
+        are mathematically similar to Cartesian products; 
+        and sum types, like variants, which let you combine multiple different possibilities into one type, and are mathematically similar to disjoint unions.
+
+        Algebraic data types gain much of their power from the ability to construct layered combinations of sums and products. 
+        Let's see what we can achieve with this by revisiting the logging server types that were described in Chapter 5, Records. 
+        We'll start by reminding ourselves of the definition of Log_entry.t:
+
+            # module Log_entry = struct
+                type t =
+                  { session_id: string;
+                    time: Time.t;
+                    important: bool;
+                    message: string;
+                  }
+              end
+              ;;
+             module Log_entry :
+               sig
+                 type t = {
+                   session_id : string;
+                   time : Time.t;
+                   important : bool;
+                   message : string;
+                 }
+               end
+
+        This record type combines multiple pieces of data into one value. 
+        In particular, a single Log_entry.t has a session_id and a time and an important flag and a message. 
+        More generally, you can think of record types as conjunctions. 
+        Variants, on the other hand, are disjunctions, letting you represent multiple possibilities, as in the following example:
+
+            # type client_message = | Logon of Logon.t
+                                    | Heartbeat of Heartbeat.t
+                                    | Log_entry of Log_entry.t
+              ;;
+             type client_message =
+                 Logon of Logon.t
+               | Heartbeat of Heartbeat.t
+               | Log_entry of Log_entry.t
 
 
     Variants and Recursive Data Structures
