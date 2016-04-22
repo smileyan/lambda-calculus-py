@@ -433,7 +433,59 @@ Chapter 6. Variants
               ;;
              val eval : 'a expr -> ('a -> bool) -> bool = <fun>
 
+        The structure of the code is pretty straightforward—we're just pattern matching over the structure of the data, 
+        doing the appropriate calculation based on which tag we see. To use this evaluator on a concrete example, 
+        we just need to write the base_eval function, which is capable of evaluating a base predicate.
 
+        Another useful operation on expressions is simplification. The following is a set of simplifying construction functions that mirror the tags of an expr:
+
+            # let and_ l =
+                if List.mem l (Const false) then Const false
+                else
+                  match List.filter l ~f:((<>) (Const true)) with
+                  | [] -> Const true
+                  | [ x ] -> x
+                  | l -> And l
+
+              let or_ l =
+                if List.mem l (Const true) then Const true
+                else
+                  match List.filter l ~f:((<>) (Const false)) with
+                  | [] -> Const false
+                  | [x] -> x
+                  | l -> Or l
+
+              let not_ = function
+                | Const b -> Const (not b)
+                | e -> Not e
+              ;;
+             val and_ : 'a expr list -> 'a expr = <fun>
+             val or_ : 'a expr list -> 'a expr = <fun>
+             val not_ : 'a expr -> 'a expr = <fun>
+
+        We can now write a simplification routine that is based on the preceding functions.
+
+            # let rec simplify = function
+                | Base _ | Const _ as x -> x
+                | And l -> and_ (List.map ~f:simplify l)
+                | Or l  -> or_  (List.map ~f:simplify l)
+                | Not e -> not_ (simplify e)
+              ;;
+             val simplify : 'a expr -> 'a expr = <fun>
+
+        We can apply this to a Boolean expression and see how good a job it does at simplifying it:
+
+            # simplify (Not (And [ Or [Base "it's snowing"; Const true];
+                                   Base "it's raining"]));;
+             - : string expr = Not (Base "it's raining")
+
+        Here, it correctly converted the Or branch to Const true and then eliminated the And entirely, since the And then had only one nontrivial component.
+
+        There are some simplifications it misses, however. In particular, see what happens if we add a double negation in:
+
+            # simplify (Not (And [ Or [Base "it's snowing"; Const true];
+                                   Not (Not (Base "it's raining"))]));;
+             - : string expr = Not (Not (Not (Base "it's raining")))
 
 
 
