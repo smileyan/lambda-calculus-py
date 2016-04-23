@@ -487,11 +487,34 @@ Chapter 6. Variants
                                    Not (Not (Base "it's raining"))]));;
              - : string expr = Not (Not (Not (Base "it's raining")))
 
+        It fails to remove the double negation, and it's easy to see why. 
+        The not_ function has a catch-all case, so it ignores everything but the one case it explicitly considers, 
+        that of the negation of a constant. Catch-all cases are generally a bad idea, 
+        and if we make the code more explicit, we see that the missing of the double negation is more obvious:
 
+            # let not_ = function
+                | Const b -> Const (not b)
+                | (Base _ | And _ | Or _ | Not _) as e -> Not e
+              ;;
+             val not_ : 'a expr -> 'a expr = <fun>
 
+        We can of course fix this by simply adding an explicit case for double negation:
 
+            # let not_ = function
+                | Const b -> Const (not b)
+                | Not e -> e
+                | (Base _ | And _ | Or _ ) as e -> Not e
+              ;;
+             val not_ : 'a expr -> 'a expr = <fun>
 
+        The example of a Boolean expression language is more than a toy. 
+        There's a module very much in this spirit in Core called Blang (short for "Boolean language"), 
+        and it gets a lot of practical use in a variety of applications. 
+        The simplification algorithm in particular is useful when you want to use it to 
+        specialize the evaluation of expressions for which the evaluation of some of the base predicates is already known.
 
+        More generally, using variants to build recursive data structures is a common technique, 
+        and shows up everywhere from designing little languages to building complex data structures.
 
     Polymorphic Variants
 
