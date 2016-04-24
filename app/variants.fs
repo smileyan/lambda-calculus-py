@@ -518,6 +518,26 @@ Chapter 6. Variants
 
     Polymorphic Variants
 
+        In addition to the ordinary variants we've seen so far, OCaml also supports so-called polymorphic variants. 
+        As we'll see, polymorphic variants are more flexible and syntactically more lightweight than ordinary variants, 
+        but that extra power comes at a cost.
+
+        Syntactically, polymorphic variants are distinguished from ordinary variants by the leading backtick. 
+        And unlike ordinary variants, polymorphic variants can be used without an explicit type declaration:
+
+            # let three = `Int 3;;
+             val three : [> `Int of int ] = `Int 3
+            # let four = `Float 4.;;
+             val four : [> `Float of float ] = `Float 4.
+            # let nan = `Not_a_number;;
+             val nan : [> `Not_a_number ] = `Not_a_number
+            # [three; four; nan];;
+             - : [> `Float of float | `Int of int | `Not_a_number ] list =
+             [`Int 3; `Float 4.; `Not_a_number]
+
+        As you can see, polymorphic variant types are inferred automatically, and 
+        when we combine variants with different tags, the compiler infers a new type that knows about all of those tags. Note that in the preceding example, the tag name (e.g., `Int) matches the type name (int). This is a common convention in OCaml.
+
 
 
         Example: Terminal Colors Redux
