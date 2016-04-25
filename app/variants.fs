@@ -538,6 +538,58 @@ Chapter 6. Variants
         As you can see, polymorphic variant types are inferred automatically, and 
         when we combine variants with different tags, the compiler infers a new type that knows about all of those tags. Note that in the preceding example, the tag name (e.g., `Int) matches the type name (int). This is a common convention in OCaml.
 
+        The type system will complain if it sees incompatible uses of the same tag:
+
+            # let five = `Int "five";;
+             val five : [> `Int of string ] = `Int "five"
+            # [three; four; five];;
+             Characters 14-18:
+             Error: This expression has type [> `Int of string ]
+                    but an expression was expected of type
+                      [> `Float of float | `Int of int ]
+                    Types for tag `Int are incompatible
+
+        The > at the beginning of the variant types above is critical because 
+        it marks the types as being open to combination with other variant types. 
+        We can read the type [> `Int of string | `Float of float] as describing a variant 
+        whose tags include `Int of string and `Float of float, but may include more tags as well. 
+        In other words, you can roughly translate > to mean: "these tags or more."
+
+        OCaml will in some cases infer a variant type with <, to indicate "these tags or less," as in the following example:
+
+            # let is_positive = function
+                 | `Int   x -> x > 0
+                 | `Float x -> x > 0.
+              ;;
+             val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
+
+        The < is there because is_positive has no way of dealing with values that have tags 
+        other than `Float of float or `Int of int.
+
+        We can think of these < and > markers as indications of upper and lower bounds on the tags involved. 
+        If the same set of tags are both an upper and a lower bound, 
+        we end up with an exact polymorphic variant type, which has neither marker. For example:
+
+        Perhaps surprisingly, we can also create polymorphic variant types that have different upper and lower bounds. 
+        Note that Ok and Error in the following example come from the Result.t type from Core:
+
+            # let is_positive = function
+                 | `Int   x -> Ok (x > 0)
+                 | `Float x -> Ok (x > 0.)
+                 | `Not_a_number -> Error "not a number";;
+             val is_positive :
+              [< `Float of float | `Int of int | `Not_a_number ] ->
+              (bool, string) Result.t = <fun>
+            # List.filter [three; four] ~f:(fun x ->
+                 match is_positive x with Error _ -> false | Ok b -> b);;
+             - : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ] list =
+             [`Int 3; `Float 4.]
+
+        Here, the inferred type states that the tags can be no more than `Float, `Int, and `Not_a_number, 
+        and must contain at least `Float and `Int. As you can already start to see, 
+        polymorphic variants can lead to fairly complex inferred types.
+
+
 
 
         Example: Terminal Colors Redux
