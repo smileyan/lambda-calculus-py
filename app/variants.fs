@@ -589,11 +589,71 @@ Chapter 6. Variants
         and must contain at least `Float and `Int. As you can already start to see, 
         polymorphic variants can lead to fairly complex inferred types.
 
-
-
-
         Example: Terminal Colors Redux
 
+            To see how to use polymorphic variants in practice, we'll return to terminal colors. 
+            Imagine that we have a new terminal type that adds yet more colors, say, by adding an alpha channel so you can specify translucent colors. 
+            We could model this extended set of colors as follows, using an ordinary variant:
+
+                # type extended_color =
+                    | Basic of basic_color * weight  (* basic colors, regular and bold *)
+                    | RGB   of int * int * int       (* 6x6x6 color space *)
+                    | Gray  of int                   (* 24 grayscale levels *)
+                    | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
+                  ;;
+                 type extended_color =
+                     Basic of basic_color * weight
+                   | RGB of int * int * int
+                   | Gray of int
+                   | RGBA of int * int * int * int
+
+            We want to write a function extended_color_to_int, that works like color_to_int for all of the old kinds of colors, 
+            with new logic only for handling colors that include an alpha channel. One might try to write such a function as follows.
+
+                # let extended_color_to_int = function
+                    | RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+                    | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
+                  ;;
+                Characters 154-159:
+                Error: This expression has type extended_color
+                       but an expression was expected of type color
+
+            The code looks reasonable enough, but it leads to a type error because extended_color and color are in the compiler's view distinct and unrelated types. 
+            The compiler doesn't, for example, recognize any equality between the Basic tag in the two types.
+
+            What we want to do is to share tags between two different variant types, 
+            and polymorphic variants let us do this in a natural way. 
+            First, let's rewrite basic_color_to_int and color_to_int using polymorphic variants. The translation here is pretty straightforward:
+
+                # let basic_color_to_int = function
+                    | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
+                    | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
+
+                  let color_to_int = function
+                    | `Basic (basic_color,weight) ->
+                      let base = match weight with `Bold -> 8 | `Regular -> 0 in
+                      base + basic_color_to_int basic_color
+                    | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+                    | `Gray i -> 232 + i
+                 ;;
+                 val basic_color_to_int :
+                   [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] ->
+                   int = <fun>
+                 val color_to_int :
+                   [< `Basic of
+                        [< `Black
+                         | `Blue
+                         | `Cyan
+                         | `Green
+                         | `Magenta
+                         | `Red
+                         | `White
+                         | `Yellow ] *
+                        [< `Bold | `Regular ]
+                   | `Gray of int
+                   | `RGB of int * int * int ] ->
+                  int = <fun>
+                 
 
 
         When to Use Polymorphic Variants
