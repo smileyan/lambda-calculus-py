@@ -1,7 +1,7 @@
 Chapter 6. Variants
 
     into
-        Variant types are one of the most useful features of OCaml and also one of the most unusual. 
+         s are one of the most useful features of OCaml and also one of the most unusual. 
         They let you represent data that may take on multiple different forms, where each form is marked by an explicit tag. 
         As we'll see, when combined with pattern matching, variants give you a powerful way of representing complex data and of organizing the case-analysis on that information.
 
@@ -167,7 +167,7 @@ Chapter 6. Variants
         As we've seen, the type errors identified the things that needed to be fixed to complete the refactoring of the code. 
         This is fantastically useful, but for it to work well and reliably, you need to write your code in a way that maximizes the compiler's chances of helping you find the bugs. 
         To this end, a useful rule of thumb is to avoid catch-all cases in pattern matches.
-
+--------
         Here's an example that illustrates how catch-all cases interact with exhaustion checks. 
         Imagine we wanted a version of color_to_int that works on older terminals by rendering the first 16 colors (the eight basic_colors in regular and bold) in the normal way, 
         but renders everything else as white. We might have written the function as follows:
@@ -654,6 +654,34 @@ Chapter 6. Variants
                    | `RGB of int * int * int ] ->
                   int = <fun>
                  
+            Now we can try writing extended_color_to_int. The key issue with this code is that extended_color_to_int needs to invoke color_to_int with a narrower type, 
+            i.e., one that includes fewer tags. Written properly, this narrowing can be done via a pattern match. 
+            In particular, in the following code, the type of the variable color includes only the tags `Basic, `RGB, and `Gray, and not `RGBA:
+
+                # let extended_color_to_int = function
+                    | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+                    | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+                  ;;
+                val extended_color_to_int :
+                  [< `Basic of
+                       [< `Black
+                        | `Blue
+                        | `Cyan
+                        | `Green
+                        | `Magenta
+                        | `Red
+                        | `White
+                        | `Yellow ] *
+                       [< `Bold | `Regular ]
+                    | `Gray of int
+                    | `RGB of int * int * int
+                    | `RGBA of int * int * int * int ] ->
+                  int = <fun>
+
+            The preceding code is more delicately balanced than one might imagine. 
+            In particular, if we use a catch-all case instead of an explicit enumeration of the cases, 
+            the type is no longer narrowed, and so compilation fails:
+
 
 
         When to Use Polymorphic Variants
