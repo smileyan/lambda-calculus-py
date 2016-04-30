@@ -275,9 +275,11 @@ Chapter 6. Variants
         There's one awkward part of the preceding code, which is the logic that determines the session ID. 
         The code is somewhat repetitive, contemplating each of the possible message types (including the Logon case, which isn't actually possible at that point in the code) and 
         extracting the session ID in each case. This per-message-type handling seems unnecessary, since the session ID works the same way for all of the message types.
--------
-        We can improve the code by refactoring our types to explicitly reflect the information that's shared between the different messages. 
-        The first step is to cut down the definitions of each per-message record to contain just the information unique to that record:
+
+        We can improve the code by refactoring our types to explicitly reflect the information 
+        that's shared between the different messages. 
+        The first step is to cut down the definitions of each per-message record to contain just 
+        the information unique to that record:
 
             # module Log_entry = struct
                 type t = { important: bool;
@@ -341,7 +343,7 @@ Chapter 6. Variants
               string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 
         As you can see, the code for extracting the session ID has been replaced with the simple expression common.Common.session_id.
-
+-------
         In addition, this design allows us to essentially downcast to the specific message type once we know what it is and then dispatch code to handle just that message type. 
         In particular, while we use the type Common.t * details to represent an arbitrary message, we can use Common.t * Logon.t to represent a logon message. 
         Thus, if we had functions for handling individual message types, we could write a dispatch function as follows:
@@ -680,9 +682,47 @@ Chapter 6. Variants
             In particular, if we use a catch-all case instead of an explicit enumeration of the cases, 
             the type is no longer narrowed, and so compilation fails:
 
-
-
         When to Use Polymorphic Variants
+
+            At first glance, polymorphic variants look like a strict improvement over ordinary variants. 
+            You can do everything that ordinary variants can do, plus it's more flexible and more concise. What's not to like?
+
+            In reality, regular variants are the more pragmatic choice most of the time. 
+            That's because the flexibility of polymorphic variants comes at a price. Here are some of the downsides:
+
+            Complexity
+            As we've seen, the typing rules for polymorphic variants are a lot more complicated than they are for regular variants. 
+            This means that heavy use of polymorphic variants can leave you scratching your head trying to figure out why 
+            a given piece of code did or didn't compile. It can also lead to absurdly long and hard to decode error messages. 
+            Indeed, concision at the value level is often balanced out by more verbosity at the type level.
+
+            Error-finding
+            Polymorphic variants are type-safe, but the typing discipline that they impose is, by dint of its flexibility, 
+            less likely to catch bugs in your program.
+
+            Efficiency
+            This isn't a huge effect, but polymorphic variants are somewhat heavier than regular variants, 
+            and OCaml can't generate code for matching on polymorphic variants that is quite as efficient as what it generated for regular variants.
+
+            All that said, polymorphic variants are still a useful and powerful feature, 
+            but it's worth understanding their limitations and how to use them sensibly and modestly.
+
+            Probably the safest and most common use case for polymorphic variants is where 
+            ordinary variants would be sufficient but are syntactically too heavyweight. 
+            For example, you often want to create a variant type for encoding the inputs or outputs to a function, 
+            where it's not worth declaring a separate type for it. 
+            Polymorphic variants are very useful here, and as long as there are type annotations that constrain these to have explicit, exact types, 
+            this tends to work well.
+
+            Variants are most problematic exactly where you take full advantage of their power; 
+            in particular, when you take advantage of the ability of polymorphic variant types to overlap in the tags they support. 
+            This ties into OCaml's support for subtyping. 
+            As we'll discuss further when we cover objects in Chapter 11, Objects, subtyping brings in a lot of complexity, 
+            and most of the time, that's complexity you want to avoid.
+
+
+
+
 
 
 
