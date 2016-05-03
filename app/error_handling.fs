@@ -60,3 +60,50 @@ Chapter 7. Error Handling
           ;;
          val find_mismatches : ('a, 'b) Hashtbl.t -> ('a, 'b) Hashtbl.t -> 'a list =
            <fun>
+
+        The use of options to encode errors underlines the fact that it's not clear whether a particular outcome, 
+        like not finding something on a list, is an error or is just another valid outcome. 
+        This depends on the larger context of your program, and thus is not something that a general-purpose library can know in advance. 
+        One of the advantages of error-aware return types is that they work well in both situations.
+
+    Encoding Errors with Result
+
+        Options aren't always a sufficiently expressive way to report errors. 
+        Specifically, when you encode an error as None, there's nowhere to say anything about the nature of the error.
+
+        Result.t is meant to address this deficiency. The type is defined as follows:
+
+        module Result : sig
+           type ('a,'b) t = | Ok of 'a
+                            | Error of 'b
+        end
+
+        A Result.t is essentially an option augmented with the ability to store other information in the error case. 
+        Like Some and None for options, the constructors Ok and Error are promoted to the toplevel by Core.Std. As such, we can write:
+
+        # [ Ok 3; Error "abject failure"; Ok 4 ];;
+         - : (int, string) Result.t list = [Ok 3; Error "abject failure"; Ok 4]
+
+        without first opening the Result module.
+
+    Error and Or_error
+
+        Result.t gives you complete freedom to choose the type of value you use to represent errors, 
+        but it's often useful to standardize on an error type. Among other things, this makes it easier to write utility functions to automate common error handling patterns.
+
+        But which type to choose? Is it better to represent errors as strings? Some more structured representation like XML? Or something else entirely?
+
+        Core's answer to this question is the Error.t type, which tries to forge a good compromise between efficiency, convenience, and control over the presentation of errors.
+
+        It might not be obvious at first why efficiency is an issue at all. 
+        But generating error messages is an expensive business. 
+        An ASCII representation of a value can be quite time-consuming to construct, particularly if it includes expensive-to-convert numerical data.
+
+        Error gets around this issue through laziness. 
+        In particular, an Error.t allows you to put off generation of the error string until and unless you need it, 
+        which means a lot of the time you never have to construct it at all. You can of course construct an error directly from a string:
+
+        # Error.of_string "something went wrong";;
+         - : Error.t = something went wrong
+
+
