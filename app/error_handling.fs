@@ -106,4 +106,42 @@ Chapter 7. Error Handling
         # Error.of_string "something went wrong";;
          - : Error.t = something went wrong
 
+        But you can also construct an Error.t from a thunk, i.e., a function that takes a single argument of type unit:
 
+        # Error.of_thunk (fun () ->
+            sprintf "something went wrong: %f" 32.3343);;
+         - : Error.t = something went wrong: 32.334300
+
+        In this case, we can benefit from the laziness of Error, since the thunk won't be called unless the Error.t is converted to a string.
+
+        The most common way to create Error.ts is using s-expressions. An s-expression is a balanced parenthetical expression where the leaves of the expressions are strings. Here's a simple example:
+
+        (This (is an) (s expression))
+
+        S-expressions are supported by the Sexplib package that is distributed with Core and is the most common serialization format used in Core. 
+        Indeed, most types in Core come with built-in s-expression converters. Here's an example of creating an error using the sexp converter for times, Time.sexp_of_t:
+
+        # Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;
+         - : Error.t =
+         Something failed a long time ago: (1969-12-31 19:00:00.000000-05:00)
+
+        Note that the time isn't actually serialized into an s-expression until the error is printed out.
+
+        We're not restricted to doing this kind of error reporting with built-in types. 
+        This will be discussed in more detail in Chapter 17, Data Serialization with S-Expressions, 
+        but Sexplib comes with a language extension that can autogenerate sexp converters for newly generated types:
+
+        # let custom_to_sexp = <:sexp_of<float * string list * int>>;;
+         val custom_to_sexp : float * string list * int -> Sexp.t = <fun>
+        # custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
+         - : Sexp.t = (3.5 (a b c) 6034)
+
+        We can use this same idiom for generating an error:
+
+        # Error.create "Something went terribly wrong"
+            (3.5, ["a";"b";"c"], 6034)
+            <:sexp_of<float * string list * int>> ;;
+        - : Error.t = Something went terribly wrong: (3.5(a b c)6034)
+
+
+        
