@@ -143,5 +143,62 @@ Chapter 7. Error Handling
             <:sexp_of<float * string list * int>> ;;
         - : Error.t = Something went terribly wrong: (3.5(a b c)6034)
 
+        Error also supports operations for transforming errors. 
+        For example, it's often useful to augment an error with information about the context of the error 
+        or to combine multiple errors together. Error.tag and Error.of_list fulfill these roles:
 
-        
+        # Error.tag
+            (Error.of_list [ Error.of_string "Your tires were slashed";
+                             Error.of_string "Your windshield was smashed" ])
+            "over the weekend"
+          ;;
+        - : Error.t =
+        over the weekend: Your tires were slashed; Your windshield was smashed
+
+        The type 'a Or_error.t is just a shorthand for ('a,Error.t) Result.t, and it is, after option, the most common way of returning errors in Core.
+
+    bind and Other Error Handling Idioms
+
+        As you write more error handling code in OCaml, you'll discover that certain patterns start to emerge. 
+        A number of these common patterns have been codified by functions in modules like Option and Result. 
+        One particularly useful pattern is built around the function bind, 
+        which is both an ordinary function and an infix operator >>=. Here's the definition of bind for options:
+
+        # let bind option f =
+            match option with
+            | None -> None
+            | Some x -> f x
+          ;;
+        val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>
+
+        As you can see, bind None f returns None without calling f, and bind (Some x) f returns f x. 
+        bind can be used as a way of sequencing together error-producing functions so that the first one to produce an error terminates the computation. 
+        Here's a rewrite of compute_bounds to use a nested series of binds:
+
+        # let compute_bounds ~cmp list =
+            let sorted = List.sort ~cmp list in
+            Option.bind (List.hd sorted) (fun first ->
+              Option.bind (List.last sorted) (fun last ->
+                Some (first,last)))
+          ;;
+        val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+          <fun>
+
+        The preceding code is a little bit hard to swallow, however, on a syntactic level. 
+        We can make it easier to read and drop some of the parentheses, by using the infix operator form of bind, 
+        which we get access to by locally opening Option.Monad_infix. 
+        The module is called Monad_infix because the bind operator is part of a subinterface called Monad, 
+        which we'll see again in Chapter 18, Concurrent Programming with Async:
+
+        # let compute_bounds ~cmp list =
+            let open Option.Monad_infix in
+            let sorted = List.sort ~cmp list in
+            List.hd sorted   >>= fun first ->
+            List.last sorted >>= fun last  ->
+            Some (first,last)
+          ;;
+        val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+          <fun>
+
+
+
