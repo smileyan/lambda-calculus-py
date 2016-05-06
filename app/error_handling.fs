@@ -200,5 +200,28 @@ Chapter 7. Error Handling
         val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
           <fun>
 
+        This use of bind isn't really materially better than the one we started with, and indeed, 
+        for small examples like this, direct matching of options is generally better than using bind. 
+        But for large, complex examples with many stages of error handling, the bind idiom becomes clearer and easier to manage.
+
+        There are other useful idioms encoded in the functions in Option. 
+        One example is Option.both, which takes two optional values and produces a new optional pair 
+        that is None if either of its arguments are None. Using Option.both, we can make compute_bounds even shorter:
+
+        # let compute_bounds ~cmp list =
+            let sorted = List.sort ~cmp list in
+            Option.both (List.hd sorted) (List.last sorted)
+          ;;
+        val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+          <fun>
+
+        These error-handling functions are valuable because they let you express your error handling both explicitly and concisely. 
+        We've only discussed these functions in the context of the Option module, but more functionality of this kind can be found in the Result and Or_error modules.
+
+    EXCEPTIONS
+
+
+
+
 
 
