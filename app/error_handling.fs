@@ -220,7 +220,54 @@ Chapter 7. Error Handling
 
     EXCEPTIONS
 
+        Exceptions in OCaml are not that different from exceptions in many other languages, 
+        like Java, C#, and Python. Exceptions are a way to terminate a computation and report an error, 
+        while providing a mechanism to catch and handle (and possibly recover from) exceptions that are triggered by subcomputations.
 
+        You can trigger an exception by, for example, dividing an integer by zero:
+
+        # 3 / 0;;
+        Exception: Division_by_zero.
+
+        And an exception can terminate a computation even if it happens nested somewhere deep within it:
+
+        # List.map ~f:(fun x -> 100 / x) [1;3;0;4];;
+        Exception: Division_by_zero.
+
+        If we put a printf in the middle of the computation, we can see that List.map is interrupted partway through its execution, 
+        never getting to the end of the list:
+
+        # List.map ~f:(fun x -> printf "%d\n%!" x; 100 / x) [1;3;0;4];;
+
+
+        1
+        3
+        0
+        Exception: Division_by_zero.
+
+        In addition to built-in exceptions like Divide_by_zero, OCaml lets you define your own:
+
+        # exception Key_not_found of string;;
+         exception Key_not_found of string
+        # raise (Key_not_found "a");;
+         Exception: Key_not_found("a").
+
+        Exceptions are ordinary values and can be manipulated just like other OCaml values:
+
+        # let exceptions = [ Not_found; Division_by_zero; Key_not_found "b" ];;
+         val exceptions : exn list = [Not_found; Division_by_zero; Key_not_found("b")]
+        # List.filter exceptions  ~f:(function
+            | Key_not_found _ | Not_found -> true
+            | _ -> false);;
+         - : exn list = [Not_found; Key_not_found("b")]
+
+        Exceptions are all of the same type, exn. The exn type is something of a special case in the OCaml type system. 
+        It is similar to the variant types we encountered in Chapter 6, 
+        Variants, except that it is open, meaning that it's not fully defined in any one place. 
+        In particular, new tags (specifically, new exceptions) can be added to it by different parts of the program. 
+        This is in contrast to ordinary variants, which are defined with a closed universe of available tags. 
+        One result of this is that you can never have an exhaustive match on an exn, 
+        since the full set of possible exceptions is not known.
 
 
 
