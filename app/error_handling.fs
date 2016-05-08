@@ -269,6 +269,43 @@ Chapter 7. Error Handling
         One result of this is that you can never have an exhaustive match on an exn, 
         since the full set of possible exceptions is not known.
 
+        The following function uses the Key_not_found exception we defined above to signal an error:
+
+        # let rec find_exn alist key = match alist with
+            | [] -> raise (Key_not_found key)
+            | (key',data) :: tl -> if key = key' then data else find_exn tl key
+          ;;
+         val find_exn : (string * 'a) list -> string -> 'a = <fun>
+        # let alist = [("a",1); ("b",2)];;
+         val alist : (string * int) list = [("a", 1); ("b", 2)]
+        # find_exn alist "a";;
+         - : int = 1
+        # find_exn alist "c";;
+         Exception: Key_not_found("c").
+
+        Note that we named the function find_exn to warn the user that the function routinely throws exceptions, 
+        a convention that is used heavily in Core.
+
+        In the preceding example, raise throws the exception, thus terminating the computation. 
+        The type of raise is a bit surprising when you first see it:
+
+        # raise;;
+         - : exn -> 'a = <fun>
+
+        The return type of 'a makes it look like raise manufactures a value to return that is completely unconstrained in its type. 
+        That seems impossible, and it is. Really, raise has a return type of 'a because it never returns at all. 
+        This behavior isn't restricted to functions like raise that terminate by throwing exceptions. 
+        Here's another example of a function that doesn't return a value:
+
+        # let rec forever () = forever ();;
+         val forever : unit -> 'a = <fun>
+
+        forever doesn't return a value for a different reason: it's an infinite loop.
+
+        This all matters because it means that the return type of raise can be whatever it needs to be to fit into the context it is called in. 
+        Thus, the type system will let us throw an exception anywhere in a program.
+
+
 
 
 
