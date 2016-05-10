@@ -378,3 +378,42 @@ Chapter 7. Error Handling
 
         This shows what's special about assert: it captures the line number and character offset of the source location from which the assertion was made.
 
+    Exception Handlers
+
+        So far, we've only seen exceptions fully terminate the execution of a computation. 
+        But often, we want a program to be able to respond to and recover from an exception. This is achieved through the use of exception handlers.
+
+        In OCaml, an exception handler is declared using a try/with statement. Here's the basic syntax.
+
+        try <expr> with
+        | <pat1> -> <expr1>
+        | <pat2> -> <expr2>
+        ...
+
+        A try/with clause first evaluates its body, expr. If no exception is thrown, then the result of evaluating the body is what the entire try/with clause evaluates to.
+
+        But if the evaluation of the body throws an exception, then the exception will be fed to the pattern-match statements following the with. 
+        If the exception matches a pattern, then we consider the exception caught, and the try/with clause evaluates to the expression on the righthand side of the matching pattern.
+
+        Otherwise, the original exception continues up the stack of function calls, to be handled by the next outer exception handler. 
+        If the exception is never caught, it terminates the program.
+
+    Cleaning Up in the Presence of Exceptions
+
+        One headache with exceptions is that they can terminate your execution at unexpected places, leaving your program in an awkward state. 
+        Consider the following function for loading a file full of reminders, formatted as s-expressions:
+
+        # let reminders_of_sexp =
+            <:of_sexp<(Time.t * string) list>>
+          ;;
+         val reminders_of_sexp : Sexp.t -> (Time.t * string) list = <fun>
+        # let load_reminders filename =
+            let inc = In_channel.create filename in
+            let reminders = reminders_of_sexp (Sexp.input_sexp inc) in
+            In_channel.close inc;
+            reminders
+          ;;
+         val load_reminders : string -> (Time.t * string) list = <fun>
+
+        The problem with this code is that the function that loads the s-expression and parses it into a list of Time.t/string pairs might throw an exception if the file in question is malformed. 
+        Unfortunately, that means that the In_channel.t that was opened will never be closed, leading to a file-descriptor leak.
