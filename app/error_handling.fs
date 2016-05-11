@@ -417,3 +417,46 @@ Chapter 7. Error Handling
 
         The problem with this code is that the function that loads the s-expression and parses it into a list of Time.t/string pairs might throw an exception if the file in question is malformed. 
         Unfortunately, that means that the In_channel.t that was opened will never be closed, leading to a file-descriptor leak.
+
+        We can fix this using Core's protect function, which takes two arguments: 
+        a thunk f, which is the main body of the computation to be run; 
+        and a thunk finally, which is to be called when f exits, whether it exits normally or with an exception. 
+        This is similar to the try/finally construct available in many programming languages, but it is implemented in a library, rather than being a built-in primitive. 
+        Here's how it could be used to fix load_reminders:
+
+        # let load_reminders filename =
+            let inc = In_channel.create filename in
+            protect ~f:(fun () -> reminders_of_sexp (Sexp.input_sexp inc))
+              ~finally:(fun () -> In_channel.close inc)
+          ;;
+         val load_reminders : string -> (Time.t * string) list = <fun>
+
+        This is a common enough problem that In_channel has a function called with_file that automates this pattern:
+
+        # let reminders_of_sexp filename =
+            In_channel.with_file filename ~f:(fun inc ->
+              reminders_of_sexp (Sexp.input_sexp inc))
+          ;;
+         val reminders_of_sexp : string -> (Time.t * string) list = <fun>
+
+        In_channel.with_file is built on top of protect so that it can clean up after itself in the presence of exceptions.
+
+    Catching Specific Exceptions
+
+        OCaml's exception-handling system allows you to tune your error-recovery logic to the particular error that was thrown. 
+        For example, List.find_exn throws Not_found when the element in question can't be found. 
+        Let's look at an example of how you could take advantage of this. In particular, consider the following function:
+
+        # let lookup_weight ~compute_weight alist key =
+            try
+              let data = List.Assoc.find_exn alist key in
+              compute_weight data
+            with
+              Not_found -> 0. ;;
+         val lookup_weight :
+           compute_weight:('a -> float) -> ('b, 'a) List.Assoc.t -> 'b -> float =
+           <fun>
+
+        As you can see from the type, lookup_weight takes an association list, 
+        a key for looking up a corresponding value in that list, and a function for computing a floating-point weight from the looked-up value. 
+        If no value is found, then a weight of 0. should be returned.
