@@ -460,3 +460,39 @@ Chapter 7. Error Handling
         As you can see from the type, lookup_weight takes an association list, 
         a key for looking up a corresponding value in that list, and a function for computing a floating-point weight from the looked-up value. 
         If no value is found, then a weight of 0. should be returned.
+
+        The use of exceptions in this code, however, presents some problems. 
+        In particular, what happens if compute_weight throws an exception? 
+        Ideally, lookup_weight should propagate that exception on, but if the exception happens to be Not_found, then that's not what will happen:
+
+        # lookup_weight ~compute_weight:(fun _ -> raise Not_found)
+            ["a",3; "b",4] "a" ;;
+         - : float = 0.
+
+        This kind of problem is hard to detect in advance because the type system doesn't tell you what exceptions a given function might throw. 
+        For this reason, it's generally better to avoid relying on the identity of the exception to determine the nature of a failure. 
+        A better approach is to narrow the scope of the exception handler, so that when it fires it's very clear what part of the code failed:
+
+        # let lookup_weight ~compute_weight alist key =
+            match
+              try Some (List.Assoc.find_exn alist key)
+              with _ -> None
+            with
+            | None -> 0.
+            | Some data -> compute_weight data ;;
+         val lookup_weight :
+           compute_weight:('a -> float) -> ('b, 'a) List.Assoc.t -> 'b -> float =
+           <fun>
+
+        At this point, it makes sense to simply use the nonexception-throwing function, List.Assoc.find, instead:
+
+        # let lookup_weight ~compute_weight alist key =
+            match List.Assoc.find alist key with
+            | None -> 0.
+            | Some data -> compute_weight data ;;
+         val lookup_weight :
+           compute_weight:('a -> float) -> ('b, 'a) List.Assoc.t -> 'b -> float =
+           <fun>
+
+    Backtraces
+
