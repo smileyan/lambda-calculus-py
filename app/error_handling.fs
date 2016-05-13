@@ -496,3 +496,47 @@ Chapter 7. Error Handling
 
     Backtraces
 
+        A big part of the value of exceptions is that they provide useful debugging information in the form of a stack backtrace. Consider the following simple program:
+
+        open Core.Std
+        exception Empty_list
+
+        let list_max = function
+          | [] -> raise Empty_list
+          | hd :: tl -> List.fold tl ~init:hd ~f:(Int.max)
+
+        let () =
+          printf "%d\n" (list_max [1;2;3]);
+          printf "%d\n" (list_max [])
+
+        If we build and run this program, we'll get a stack backtrace that will provide some information about where the error occurred and the stack of function calls that were in place at the time of the error:
+
+        $ corebuild blow_up.byte
+        $ ./blow_up.byte
+         3
+         Fatal error: exception Blow_up.Empty_list
+         Raised at file "blow_up.ml", line 5, characters 16-26
+         Called from file "blow_up.ml", line 10, characters 17-28
+
+        You can also capture a backtrace within your program by calling Exn.backtrace, which returns the backtrace of the most recently thrown exception. 
+        This is useful for reporting detailed information on errors that did not cause your program to fail.
+
+        This works well if you have backtraces enabled, but that isn't always the case. 
+        In fact, by default, OCaml has backtraces turned off, and even if you have them turned on at runtime, you can't get backtraces unless you have compiled with debugging symbols. 
+        Core reverses the default, so if you're linking in Core, you will have backtraces enabled by default.
+
+        Even using Core and compiling with debugging symbols, you can turn backtraces off by setting the OCAMLRUNPARAM environment variable to be empty:
+
+        $ corebuild blow_up.byte
+        $ OCAMLRUNPARAM= ./blow_up.byte
+         3
+         Fatal error: exception Blow_up.Empty_list
+
+        The resulting error message is considerably less informative. 
+        You can also turn backtraces off in your code by calling Backtrace.Exn.set_recording false.
+
+        There is a legitimate reasons to run without backtraces: speed. 
+        OCaml's exceptions are fairly fast, but they're even faster still if you disable backtraces. 
+        Here's a simple benchmark that shows the effect, using the core_bench package:
+
+
