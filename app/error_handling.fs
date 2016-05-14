@@ -539,4 +539,47 @@ Chapter 7. Error Handling
         OCaml's exceptions are fairly fast, but they're even faster still if you disable backtraces. 
         Here's a simple benchmark that shows the effect, using the core_bench package:
 
+        open Core.Std
+        open Core_bench.Std
+
+        let simple_computation () =
+          List.range 0 10
+          |> List.fold ~init:0 ~f:(fun sum x -> sum + x * x)
+          |> ignore
+
+        let simple_with_handler () =
+          try simple_computation () with Exit -> ()
+
+        let end_with_exn () =
+          try
+            simple_computation ();
+            raise Exit
+          with Exit -> ()
+
+        let () =
+          [ Bench.Test.create ~name:"simple computation"
+              (fun () -> simple_computation ());
+            Bench.Test.create ~name:"simple computation w/handler"
+              (fun () -> simple_with_handler ());
+            Bench.Test.create ~name:"end with exn"
+              (fun () -> end_with_exn ());
+          ]
+          |> Bench.make_command
+          |> Command.run
+
+        We're testing three cases here: a simple computation with no exceptions; 
+        the same computation with an exception handler but no thrown exceptions; 
+        and finally the same computation where we use the exception to do the control flow back to the caller.
+
+        If we run this with stacktraces on, the benchmark results look like this:
+
+        $ corebuild -pkg core_bench exn_cost.native
+        $ ./exn_cost.native -ascii cycles
+        Estimated testing time 30s (change using -quota SECS).
+
+          Name                           Time/Run   Cycles/Run   % of max  
+         ------------------------------ ---------- ------------ ---------- 
+          simple computation                74.43          171      71.63  
+          simple computation w/handler      92.46          213      88.98  
+          end with exn                        104          239     100.00  
 
