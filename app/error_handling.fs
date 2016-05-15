@@ -583,3 +583,85 @@ Chapter 7. Error Handling
           simple computation w/handler      92.46          213      88.98  
           end with exn                        104          239     100.00  
 
+        Here, we see that we lose something like 30 cycles to adding an exception handler, 
+        and 60 more to actually throwing and catching an exception. If we turn backtraces off, then the results look like this:
+
+        $ OCAMLRUNPARAM= ./exn_cost.native -ascii cycles
+        Estimated testing time 30s (change using -quota SECS).
+                                                                   
+          Name                           Time/Run   Cycles/Run   % of max  
+         ------------------------------ ---------- ------------ ---------- 
+          simple computation                84.85          195      82.06  
+          simple computation w/handler      91.95          211      88.93  
+          end with exn                        103          238     100.00  
+
+        Here, the handler costs about the same, but the exception itself costs only 25, as opposed to 60 additional cycles. 
+        All told, this should only matter if you're using exceptions routinely as part of your flow control, 
+        which is in most cases a stylistic mistake anyway.
+
+    From Exceptions to Error-Aware Types and Back Again
+
+        Both exceptions and error-aware types are necessary parts of programming in OCaml. 
+        As such, you often need to move between these two worlds. 
+        Happily, Core comes with some useful helper functions to help you do just that. 
+        For example, given a piece of code that can throw an exception, you can capture that exception into an option as follows:
+
+        # let find alist key =
+            Option.try_with (fun () -> find_exn alist key) ;;
+         val find : (string * 'a) list -> string -> 'a option = <fun>
+        # find ["a",1; "b",2] "c";;
+         - : int option = None
+        # find ["a",1; "b",2] "b";;
+         - : int option = Some 2
+
+        And Result and Or_error have similar try_with functions. So, we could write:
+
+        # let find alist key =
+            Or_error.try_with (fun () -> find_exn alist key) ;;
+         val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>
+        # find ["a",1; "b",2] "c";;
+         - : int Or_error.t = Core_kernel.Result.Error ("Key_not_found(\"c\")")
+
+        And then we can reraise that exception:
+
+        # Or_error.ok_exn (find ["a",1; "b",2] "b");;
+         - : int = 2
+        # Or_error.ok_exn (find ["a",1; "b",2] "c");;
+         Exception: ("Key_not_found(\"c\")").
+
+    CHOOSING AN ERROR-HANDLING STRATEGY
+
+        Given that OCaml supports both exceptions and error-aware return types, how do you choose between them? 
+        The key is to think about the trade-off between concision and explicitness.
+
+        Exceptions are more concise because they allow you to defer the job of error handling to some larger scope, 
+        and because they don't clutter up your types. 
+        But this concision comes at a cost: exceptions are all too easy to ignore. 
+        Error-aware return types, on the other hand, are fully manifest in your type definitions, 
+        making the errors that your code might generate explicit and impossible to ignore.
+
+        The right trade-off depends on your application. 
+        If you're writing a rough-and-ready program where getting it done quickly is key and failure is not that expensive, 
+        then using exceptions extensively may be the way to go. 
+        If, on the other hand, you're writing production software whose failure is costly, 
+        then you should probably lean in the direction of using error-aware return types.
+
+        To be clear, it doesn't make sense to avoid exceptions entirely. 
+        The maxim of "use exceptions for exceptional conditions" applies. 
+        If an error occurs sufficiently rarely, then throwing an exception is often the right behavior.
+
+        Also, for errors that are omnipresent, error-aware return types may be overkill. 
+        A good example is out-of-memory errors, which can occur anywhere, 
+        and so you'd need to use error-aware return types everywhere to capture those. 
+        Having every operation marked as one that might fail is no more explicit than having none of them marked.
+
+        In short, for errors that are a foreseeable and ordinary part of the execution of your production code and 
+        that are not omnipresent, error-aware return types are typically the right solution.
+
+
+
+
+
+
+
+
