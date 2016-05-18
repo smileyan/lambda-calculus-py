@@ -140,6 +140,62 @@ Chapter 8. Imperative Programming
             t.length <- t.length - 1
           )
 
+        This preceding code is made more complicated by the fact that we need to detect whether we are overwriting or removing an existing binding, so we can decide whether t.length needs to be changed. 
+        The helper function bucket_has_key is used for this purpose.
+
+        Another piece of syntax shows up in both add and remove: the use of the <- operator to update elements of an array (array.(i) <- expr) and for updating a record field (record.field <- expression).
+
+        We also use ;, the sequencing operator, to express a sequence of imperative actions. We could have done the same using let bindings:
+
+        let () = t.buckets.(i) <- (key, data) :: filtered_bucket in
+          if not replace then t.length <- t.length + 1
+
+        but ; is more concise and idiomatic. More generally,
+
+        <expr1>;
+        <expr2>;
+        ...
+        <exprN>
+
+        is equivalent to
+
+        let () = <expr1> in
+        let () = <expr2> in
+        ...
+        <exprN>
+
+        When a sequence expression expr1; expr2 is evaluated, expr1 is evaluated first, and then expr2. 
+        The expression expr1 should have type unit (though this is a warning rather than a hard restriction. The -strict-sequence compiler flag makes this a hard restriction, which is generally a good idea), 
+        and the value of expr2 is returned as the value of the entire sequence. For example, the sequence print_string "hello world"; 1 + 2 first prints the string "hello world", then returns the integer 3.
+
+        Note also that we do all of the side-effecting operations at the very end of each function. 
+        This is good practice because it minimizes the chance that such operations will be interrupted with an exception, leaving the data structure in an inconsistent state.
+
+    PRIMITIVE MUTABLE DATA
+
+        Now that we've looked at a complete example, let's take a more systematic look at imperative programming in OCaml. 
+        We encountered two different forms of mutable data above: records with mutable fields and arrays. 
+        We'll now discuss these in more detail, along with the other primitive forms of mutable data that are available in OCaml.
+
+      Array-Like Data
+        OCaml supports a number of array-like data structures; i.e., mutable integer-indexed containers that provide constant-time access to their elements. We'll discuss several of them in this section.
+
+      Ordinary arrays
+
+        The array type is used for general-purpose polymorphic arrays. The Array module has a variety of utility functions for interacting with arrays, including a number of mutating operations. 
+        These include Array.set, for setting an individual element, and Array.blit, for efficiently copying values from one range of indices to another.
+
+        Arrays also come with special syntax for retrieving an element from an array:
+
+          <array_expr>.(<index_expr>)
+
+        and for setting an element in an array:
+
+          <array_expr>.(<index_expr>) <- <value_expr>
+
+        Out-of-bounds accesses for arrays (and indeed for all the array-like data structures) will lead to an exception being thrown.
+
+        Array literals are written using [| and |] as delimiters. Thus, [| 1; 2; 3 |] is a literal integer array.
 
 
 
