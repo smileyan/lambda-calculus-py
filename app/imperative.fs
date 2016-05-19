@@ -197,6 +197,141 @@ Chapter 8. Imperative Programming
 
         Array literals are written using [| and |] as delimiters. Thus, [| 1; 2; 3 |] is a literal integer array.
 
+      Strings
+
+        Strings are essentially byte arrays which are often used for textual data. 
+        The main advantage of using a string in place of a Char.t array (a Char.t is an 8-bit character) is that the former is considerably more space-efficient; 
+        an array uses one word—8 bytes on a 64-bit machine—to store a single entry, whereas strings use 1 byte per character.
+
+        Strings also come with their own syntax for getting and setting values:
+
+          <string_expr>.[<index_expr>]
+          <string_expr>.[<index_expr>] <- <char_expr>
+
+        And string literals are bounded by quotes. There's also a module String where you'll find useful functions for working with strings.
+
+      Bigarrays
+
+        A Bigarray.t is a handle to a block of memory stored outside of the OCaml heap. 
+        These are mostly useful for interacting with C or Fortran libraries, and are discussed in Chapter 20, Memory Representation of Values. 
+        Bigarrays too have their own getting and setting syntax:
+
+        <bigarray_expr>.{<index_expr>}
+        <bigarray_expr>.{<index_expr>} <- <value_expr>
+
+      Mutable Record and Object Fields and Ref Cells
+
+        As we've seen, records are immutable by default, but individual record fields can be declared as mutable. 
+        These mutable fields can be set using the <- operator, i.e., record.field <- expr.
+
+        As we'll see in Chapter 11, Objects, fields of an object can similarly be declared as mutable, and can then be modified in much the same way as record fields.
+
+      Ref cells
+
+        Variables in OCaml are never mutable—they can refer to mutable data, but what the variable points to can't be changed. 
+        Sometimes, though, you want to do exactly what you would do with a mutable variable in another language: define a single, mutable value. 
+        In OCaml this is typically achieved using a ref, which is essentially a container with a single mutable polymorphic field.
+
+        The definition for the ref type is as follows:
+
+        # type 'a ref = { mutable contents : 'a };;
+         type 'a ref = { mutable contents : 'a; }
+
+        The standard library defines the following operators for working with refs.
+
+        ref expr
+        Constructs a reference cell containing the value defined by the expression expr.
+
+        !refcell
+        Returns the contents of the reference cell.
+
+        refcell := expr
+        Replaces the contents of the reference cell.
+
+        You can see these in action:
+
+        # let x = ref 1;;
+         val x : int ref = {contents = 1}
+        #   !x;;
+         - : int = 1
+        #   x := !x + 1;;
+         - : unit = ()
+        #   !x;;
+         - : int = 2
+
+        The preceding are just ordinary OCaml functions, which could be defined as follows:
+
+        # let ref x = { contents = x };;
+         val ref : 'a -> 'a ref = <fun>
+        #   let (!) r = r.contents;;
+         val ( ! ) : 'a ref -> 'a = <fun>
+        #   let (:=) r x = r.contents <- x;;
+         val ( := ) : 'a ref -> 'a -> unit = <fun>
+
+      Foreign Functions
+
+        Another source of imperative operations in OCaml is resources that come from interfacing with external libraries through OCaml's foreign function interface (FFI). 
+        The FFI opens OCaml up to imperative constructs that are exported by system calls or other external libraries. 
+        Many of these come built in, like access to the write system call or to the clock, while others come from user libraries, like LAPACK bindings. 
+        OCaml's FFI is discussed in more detail in Chapter 19, Foreign Function Interface.
+
+      FOR AND WHILE LOOPS
+
+        OCaml provides support for traditional imperative looping constructs, in particular, for and while loops. 
+        Neither of these constructs is strictly necessary, since they can be simulated with recursive functions. 
+        Nonetheless, explicit for and while loops are both more concise and more idiomatic when programming imperatively.
+
+        The for loop is the simpler of the two. Indeed, we've already seen the for loop in action—the iter function in Dictionary is built using it. Here's a simple example of for:
+
+          # for i = 0 to 3 do printf "i = %d\n" i done;;
+
+
+            i = 0
+            i = 1
+            i = 2
+            i = 3
+            - : unit = ()
+
+        As you can see, the upper and lower bounds are inclusive. We can also use downto to iterate in the other direction:
+
+          # for i = 3 downto 0 do printf "i = %d\n" i done;;
+
+
+            i = 3
+            i = 2
+            i = 1
+            i = 0
+            - : unit = ()
+
+        Note that the loop variable of a for loop, i in this case, is immutable in the scope of the loop and is also local to the loop, i.e., it can't be referenced outside of the loop.
+
+        OCaml also supports while loops, which include a condition and a body. 
+        The loop first evaluates the condition, and then, if it evaluates to true, evaluates the body and starts the loop again. 
+        Here's a simple example of a function for reversing an array in place:
+
+          # let rev_inplace ar =
+              let i = ref 0 in
+              let j = ref (Array.length ar - 1) in
+              (* terminate when the upper and lower indices meet *)
+              while !i < !j do
+                (* swap the two elements *)
+                let tmp = ar.(!i) in
+                ar.(!i) <- ar.(!j);
+                ar.(!j) <- tmp;
+                (* bump the indices *)
+                incr i;
+                decr j
+              done
+            ;;
+          val rev_inplace : 'a array -> unit = <fun>
+          # let nums = [|1;2;3;4;5|];;
+          val nums : int array = [|1; 2; 3; 4; 5|]
+          # rev_inplace nums;;
+          - : unit = ()
+          # nums;;
+          - : int array = [|5; 4; 3; 2; 1|]
+
+        In the preceding example, we used incr and decr, which are built-in functions for incrementing and decrementing an int ref by one, respectively.
 
 
 
