@@ -333,5 +333,108 @@ Chapter 8. Imperative Programming
 
         In the preceding example, we used incr and decr, which are built-in functions for incrementing and decrementing an int ref by one, respectively.
 
+      EXAMPLE: DOUBLY LINKED LISTS
 
+        Another common imperative data structure is the doubly linked list. 
+        Doubly linked lists can be traversed in both directions, and elements can be added and removed from the list in constant time. 
+        Core defines a doubly linked list (the module is called Doubly_linked), but we'll define our own linked list library as an illustration.
+
+        Here's the mli of the module we'll build:
+
+        (* file: dlist.mli *)
+        open Core.Std
+
+        type 'a t
+        type 'a element
+
+        (** Basic list operations  *)
+        val create   : unit -> 'a t
+        val is_empty : 'a t -> bool
+
+        (** Navigation using [element]s *)
+        val first : 'a t -> 'a element option
+        val next  : 'a element -> 'a element option
+        val prev  : 'a element -> 'a element option
+        val value : 'a element -> 'a
+
+        (** Whole-data-structure iteration *)
+        val iter    : 'a t -> f:('a -> unit) -> unit
+        val find_el : 'a t -> f:('a -> bool) -> 'a element option
+
+        (** Mutation *)
+        val insert_first : 'a t -> 'a -> 'a element
+        val insert_after : 'a element -> 'a -> 'a element
+        val remove : 'a t -> 'a element -> unit
+
+        Note that there are two types defined here: 'a t, the type of a list; and 'a element, the type of an element. 
+        Elements act as pointers to the interior of a list and allow us to navigate the list and give us a point at which to apply mutating operations.
+
+        Now let's look at the implementation. We'll start by defining 'a element and 'a t:
+
+        (* file: dlist.ml *)
+        open Core.Std
+
+        type 'a element =
+          { value : 'a;
+            mutable next : 'a element option;
+            mutable prev : 'a element option
+          }
+
+        type 'a t = 'a element option ref
+
+        An 'a element is a record containing the value to be stored in that node as well as optional (and mutable) fields pointing to the previous and next elements. 
+        At the beginning of the list, the prev field is None, and at the end of the list, the next field is None.
+
+        The type of the list itself, 'a t, is a mutable reference to an optional element. This reference is None if the list is empty, and Some otherwise.
+
+        Now we can define a few basic functions that operate on lists and elements:
+
+        let create () = ref None
+        let is_empty t = !t = None
+
+        let value elt = elt.value
+
+        let first t = !t
+        let next elt = elt.next
+        let prev elt = elt.prev
+
+        These all follow relatively straightforwardly from our type definitions.
+
+        Cyclic Data Structures
+
+        Doubly linked lists are a cyclic data structure, meaning that it is possible to follow a nontrivial sequence of pointers that closes in on itself. 
+        In general, building cyclic data structures requires the use of side effects. 
+        This is done by constructing the data elements first, and then adding cycles using assignment afterward.
+
+        There is an exception to this, though: you can construct fixed-size cyclic data structures using let rec:
+
+        This approach is quite limited, however. General-purpose cyclic data structures require mutation.
+
+    Modifying the List
+
+        Now, we'll start considering operations that mutate the list, starting with insert_first, which inserts an element at the front of the list:
+
+        let insert_first t value =
+          let new_elt = { prev = None; next = !t; value } in
+          begin match !t with
+          | Some old_first -> old_first.prev <- Some new_elt
+          | None -> ()
+          end;
+          t := Some new_elt;
+          new_elt
+
+        insert_first first defines a new element new_elt, and then links it into the list, finally setting the list itself to point to new_elt. 
+        Note that the precedence of a match expression is very low, so to separate it from the following assignment (t := Some new_elt), we surround the match with begin ... end. 
+        We could have used parentheses for the same purpose. Without some kind of bracketing, the final assignment would incorrectly become part of the None case.
+
+        We can use insert_after to insert elements later in the list. insert_after takes as arguments both an element after which to insert the new node and a value to insert:
+
+        let insert_after elt value =
+          let new_elt = { value; prev = Some elt; next = elt.next } in
+          begin match elt.next with
+          | Some old_next -> old_next.prev <- Some new_elt
+          | None -> ()
+          end;
+          elt.next <- Some new_elt;
+          new_elt
 
