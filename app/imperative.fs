@@ -438,3 +438,93 @@ Chapter 8. Imperative Programming
           elt.next <- Some new_elt;
           new_elt
 
+        Finally, we need a remove function:
+
+          let remove t elt =
+            let { prev; next; _ } = elt in
+            begin match prev with
+            | Some prev -> prev.next <- next
+            | None -> t := next
+            end;
+            begin match next with
+            | Some next -> next.prev <- prev;
+            | None -> ()
+            end;
+            elt.prev <- None;
+            elt.next <- None
+
+        Note that the preceding code is careful to change the prev pointer of the following element and the next pointer of the previous element, if they exist. 
+        If there's no previous element, then the list pointer itself is updated. In any case, the next and previous pointers of the element itself are set to None.
+
+        These functions are more fragile than they may seem. In particular, misuse of the interface may lead to corrupted data. 
+        For example, double-removing an element will cause the main list reference to be set to None, thus emptying the list. 
+        Similar problems arise from removing an element from a list it doesn't belong to.
+
+        This shouldn't be a big surprise. Complex imperative data structures can be quite tricky, considerably trickier than their pure equivalents. 
+        The issues described previously can be dealt with by more careful error detection, 
+        and such error correction is taken care of in modules like Core's Doubly_linked. 
+        You should use imperative data structures from a well-designed library when you can. 
+        And when you can't, you should make sure to put great care into your error handling.
+
+    Iteration Functions
+
+        When defining containers like lists, dictionaries, and trees, you'll typically want to define a set of iteration functions like iter, map, and fold, 
+        which let you concisely express common iteration patterns.
+
+        Dlist has two such iterators: iter, the goal of which is to call a unit-producing function on every element of the list, 
+        in order; and find_el, which runs a provided test function on each values stored in the list, 
+        returning the first element that passes the test. 
+        Both iter and find_el are implemented using simple recursive loops 
+        that use next to walk from element to element and value to extract the element from a given node:
+
+        let iter t ~f =
+          let rec loop = function
+            | None -> ()
+            | Some el -> f (value el); loop (next el)
+          in
+          loop !t
+
+        let find_el t ~f =
+          let rec loop = function
+            | None -> None
+            | Some elt ->
+              if f (value elt) then Some elt
+              else loop (next elt)
+          in
+          loop !t
+
+        This completes our implementation, but there's still considerably more work to be done to make a really usable doubly linked list. 
+        As mentioned earlier, you're probably better off using something like Core's Doubly_linked module 
+        that has a more complete interface and has more of the tricky corner cases worked out. 
+        Nonetheless, this example should serve to demonstrate some of the techniques you can use to build nontrivial imperative data structure in OCaml, 
+        as well as some of the pitfalls.
+
+    LAZINESS AND OTHER BENIGN EFFECTS
+
+      There are many instances where you basically want to program in a pure style, 
+      but you want to make limited use of side effects to improve the performance of your code. 
+      Such side effects are sometimes called benign effects, 
+      and they are a useful way of leveraging OCaml's imperative features while still maintaining most of the benefits of pure programming.
+
+      One of the simplest benign effects is laziness. A lazy value is one that is not computed until it is actually needed. 
+      In OCaml, lazy values are created using the lazy keyword, which can be used to convert any expression of type s into a lazy value of type s Lazy.t. 
+      The evaluation of that expression is delayed until forced with Lazy.force:
+
+      # let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
+       val v : float lazy_t = <lazy>
+      # Lazy.force v;;
+
+      performing lazy computation
+       - : float = 4.
+      # Lazy.force v;;
+       - : float = 4.
+
+      You can see from the print statement that the actual computation was performed only once, and only after force had been called.
+
+      To better understand how laziness works, let's walk through the implementation of our own lazy type. 
+      We'll start by declaring types to represent a lazy value:
+
+
+
+
+
