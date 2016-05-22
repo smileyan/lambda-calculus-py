@@ -524,6 +524,62 @@ Chapter 8. Imperative Programming
       To better understand how laziness works, let's walk through the implementation of our own lazy type. 
       We'll start by declaring types to represent a lazy value:
 
+      # type 'a lazy_state =
+          | Delayed of (unit -> 'a)
+          | Value of 'a
+          | Exn of exn
+        ;;
+       type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
+
+      A lazy_state represents the possible states of a lazy value. 
+      A lazy value is Delayed before it has been run, where Delayed holds a function for computing the value in question. 
+      A lazy value is in the Value state when it has been forced and the computation ended normally. 
+      The Exn case is for when the lazy value has been forced, but the computation ended with an exception. 
+      A lazy value is simply a ref containing a lazy_state, 
+      where the ref makes it possible to change from being in the Delayed state to being in the Value or Exn states.
+
+      We can create a lazy value from a thunk, i.e., a function that takes a unit argument. 
+      Wrapping an expression in a thunk is another way to suspend the computation of an expression:
+
+      # let create_lazy f = ref (Delayed f);;
+       val create_lazy : (unit -> 'a) -> 'a lazy_state ref = <fun>
+      # let v = create_lazy
+          (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
+       val v : float lazy_state ref = {contents = Delayed <fun>}
+
+      Now we just need a way to force a lazy value. The following function does just that:
+
+      # let force v =
+          match !v with
+          | Value x -> x
+          | Exn e -> raise e
+          | Delayed f ->
+            try
+              let x = f () in
+              v := Value x;
+              x
+            with exn ->
+              v := Exn exn;
+              raise exn
+           ;;
+       val force : 'a lazy_state ref -> 'a = <fun>
+
+      Which we can use in the same way we used Lazy.force:
+
+      # force v;;
+
+
+      performing lazy computation
+      - : float = 4.
+      # force v;;
+      - : float = 4.
+
+      The main user-visible difference between our implementation of laziness and the built-in version is syntax. 
+      Rather than writing create_lazy (fun () -> sqrt 16.), we can (with the built-in lazy) just write lazy (sqrt 16.).
+
+    Memoization and Dynamic Programming
+
+
 
 
 
