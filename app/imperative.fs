@@ -579,8 +579,141 @@ Chapter 8. Imperative Programming
 
     Memoization and Dynamic Programming
 
+      Another benign effect is memoization. A memoized function remembers the result of previous invocations of the function so that they can be returned without further computation when the same arguments are presented again.
+
+      Here's a function that takes as an argument an arbitrary single-argument function and returns a memoized version of that function. Here we'll use Core's Hashtbl module, rather than our toy Dictionary:
+
+      # let memoize f =
+          let table = Hashtbl.Poly.create () in
+          (fun x ->
+            match Hashtbl.find table x with
+            | Some y -> y
+            | None ->
+              let y = f x in
+              Hashtbl.add_exn table ~key:x ~data:y;
+              y
+          );;
+       val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
+
+      The preceding code is a bit tricky. memoize takes as its argument a function f and then allocates a hash table (called table) and returns a new function as the memoized version of f. 
+      When called, this new function looks in table first, and if it fails to find a value, calls f and stashes the result in table. 
+      Note that table doesn't go out of scope as long as the function returned by memoize is in scope.
+
+      Memoization can be useful whenever you have a function that is expensive to recompute and you don't mind caching old values indefinitely. 
+      One important caution: a memoized function by its nature leaks memory. 
+      As long as you hold on to the memoized function, you're holding every result it has returned thus far.
+
+      Memoization is also useful for efficiently implementing some recursive algorithms. 
+      One good example is the algorithm for computing the edit distance (also called the Levenshtein distance) between two strings. 
+      The edit distance is the number of single-character changes (including letter switches, insertions, and deletions) required to convert one string to the other. 
+      This kind of distance metric can be useful for a variety of approximate string-matching problems, like spellcheckers.
+
+      Consider the following code for computing the edit distance. Understanding the algorithm isn't important here, but you should pay attention to the structure of the recursive calls:
+
+      # let rec edit_distance s t =
+          match String.length s, String.length t with
+          | (0,x) | (x,0) -> x
+          | (len_s,len_t) ->
+            let s' = String.drop_suffix s 1 in
+            let t' = String.drop_suffix t 1 in
+            let cost_to_drop_both =
+              if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+            in
+            List.reduce_exn ~f:Int.min
+              [ edit_distance s' t  + 1
+              ; edit_distance s  t' + 1
+              ; edit_distance s' t' + cost_to_drop_both
+              ]
+        ;;
+       val edit_distance : string -> string -> int = <fun>
+      # edit_distance "OCaml" "ocaml";;
+       - : int = 2
+
+      The thing to note is that if you call edit_distance "OCaml" "ocaml", then that will in turn dispatch the following calls:
+
+      edit_distance "OCam" "ocaml"
+      edit_distance "OCaml" "ocam"
+      edit_distance "OCam" "ocam"
+
+      And these calls will in turn dispatch other calls:
+
+      edit_distance "OCam" "ocaml"
+        edit_distance "OCa" "ocaml"
+        edit_distance "OCam" "ocam"
+        edit_distance "OCa" "ocam"
+      edit_distance "OCaml" "ocam"
+        edit_distance "OCam" "ocam"
+        edit_distance "OCaml" "oca"
+        edit_distance "OCam" "oca"
+      edit_distance "OCam" "ocam"
+        edit_distance "OCa" "ocam"
+        edit_distance "OCam" "oca"
+        edit_distance "OCa" "oca"
+
+      As you can see, some of these calls are repeats. For example, there are two different calls to edit_distance "OCam" "oca". 
+      The number of redundant calls grows exponentially with the size of the strings, meaning that our implementation of edit_distance is brutally slow for large strings. 
+      We can see this by writing a small timing function:
+
+      # let time f =
+          let start = Time.now () in
+          let x = f () in
+          let stop = Time.now () in
+          printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
+          x ;;
+      val time : (unit -> 'a) -> 'a = <fun>
+
+      And now we can use this to try out some examples:
+
+      # time (fun () -> edit_distance "OCaml" "ocaml");;
 
 
+      Time: 0.698805ms
+      - : int = 2
+      # time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
 
+
+      Time: 1.78467s
+      - : int = 2
+
+      Just those few extra characters made it thousands of times slower!
+
+      Memoization would be a huge help here, but to fix the problem, we need to memoize the calls that edit_distance makes to itself. This technique is sometimes referred to as dynamic programming. 
+      To see how to do this, let's step away from edit_distance and instead consider a much simpler example: computing the nth element of the Fibonacci sequence. 
+      The Fibonacci sequence by definition starts out with two 1s, with every subsequent element being the sum of the previous two. The classic recursive definition of Fibonacci is as follows:
+
+      # let rec fib i =
+          if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
+      val fib : int -> int = <fun>
+
+      This is, however, exponentially slow, for the same reason that edit_distance was slow: we end up making many redundant calls to fib. It shows up quite dramatically in the performance:
+
+      # time (fun () -> fib 20);;
+
+
+      Time: 0.379086ms
+      - : int = 10946
+      # time (fun () -> fib 40);;
+
+
+      Time: 4.61983s
+      - : int = 165580141
+
+      As you can see, fib 40 takes thousands of times longer to compute than fib 20.
+
+      So, how can we use memoization to make this faster? The tricky bit is that we need to insert the memoization before the recursive calls within fib. 
+      We can't just define fib in the ordinary way and memoize it after the fact and expect the first call to fib to be improved:
+
+      # let fib = memoize fib;;
+      val fib : int -> int = <fun>
+      # time (fun () -> fib 40);;
+
+
+      Time: 4.90749s
+      - : int = 165580141
+      # time (fun () -> fib 40);;
+
+
+      Time: 0.00286102ms
+      - : int = 165580141
 
 
