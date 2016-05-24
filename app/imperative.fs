@@ -716,4 +716,49 @@ Chapter 8. Imperative Programming
       Time: 0.00286102ms
       - : int = 165580141
 
+      In order to make fib fast, our first step will be to rewrite fib in a way that unwinds the recursion. 
+      The following version expects as its first argument a function (called fib) that will be called in lieu of the usual recursive call:
+
+      # let fib_norec fib i =
+          if i <= 1 then i
+          else fib (i - 1) + fib (i - 2) ;;
+      val fib_norec : (int -> int) -> int -> int = <fun>
+
+      We can now turn this back into an ordinary Fibonacci function by tying the recursive knot:
+
+      # let rec fib i = fib_norec fib i;;
+       val fib : int -> int = <fun>
+      # fib 20;;
+       - : int = 6765
+
+      We can even write a polymorphic function that we'll call make_rec that can tie the recursive knot for any function of this form:
+
+      # let make_rec f_norec =
+          let rec f x = f_norec f x in
+          f
+        ;;
+      val make_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+      # let fib = make_rec fib_norec;;
+      val fib : int -> int = <fun>
+      # fib 20;;
+      - : int = 6765
+
+      This is a pretty strange piece of code, and it may take a few moments of thought to figure out what's going on. 
+      Like fib_norec, the function f_norec passed into make_rec is a function that isn't recursive but takes as an argument a function that it will call. 
+      What make_rec does is to essentially feed f_norec to itself, thus making it a true recursive function.
+
+      This is clever enough, but all we've really done is find a new way to implement the same old slow Fibonacci function. 
+      To make it faster, we need a variant of make_rec that inserts memoization when it ties the recursive knot. We'll call that function memo_rec:
+
+      # let memo_rec f_norec x =
+          let fref = ref (fun _ -> assert false) in
+          let f = memoize (fun x -> f_norec !fref x) in
+          fref := f;
+          f x
+        ;;
+      val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+
+
+
+
 
