@@ -758,6 +758,63 @@ Chapter 8. Imperative Programming
         ;;
       val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
 
+      Note that memo_rec has the same signature as make_rec.
+
+      We're using the reference here as a way of tying the recursive knot without using a let rec, which for reasons we'll describe later wouldn't work here.
+
+      Using memo_rec, we can now build an efficient version of fib:
+
+      # let fib = memo_rec fib_norec;;
+      val fib : int -> int = <fun>
+      # time (fun () -> fib 40);;
+
+
+      Time: 0.0371933ms
+      - : int = 102334155
+
+      And as you can see, the exponential time complexity is now gone.
+
+      The memory behavior here is important. If you look back at the definition of memo_rec, you'll see that the call memo_rec fib_norec does not trigger a call to memoize. 
+      Only when fib is called and thereby the final argument to memo_rec is presented does memoize get called. 
+      The result of that call falls out of scope when the fib call returns, and so calling memo_rec on a function does not create a memory leak—the memoization table is collected after the computation completes.
+
+      We can use memo_rec as part of a single declaration that makes this look like it's little more than a special form of let rec:
+
+      # let fib = memo_rec (fun fib i ->
+          if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
+      val fib : int -> int = <fun>
+
+      Memoization is overkill for implementing Fibonacci, and indeed, the fib defined above is not especially efficient, allocating space linear in the number passed in to fib. 
+      It's easy enough to write a Fibonacci function that takes a constant amount of space.
+
+      But memoization is a good approach for optimizing edit_distance, and we can apply the same approach we used on fib here. We will need to change edit_distance to take a pair of strings as a single argument, 
+      since memo_rec only works on single-argument functions. (We can always recover the original interface with a wrapper function.) With just that change and the addition of the memo_rec call, we can get a memoized version of edit_distance:
+
+      # let edit_distance = memo_rec (fun edit_distance (s,t) ->
+          match String.length s, String.length t with
+          | (0,x) | (x,0) -> x
+          | (len_s,len_t) ->
+            let s' = String.drop_suffix s 1 in
+            let t' = String.drop_suffix t 1 in
+            let cost_to_drop_both =
+              if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+            in
+            List.reduce_exn ~f:Int.min
+              [ edit_distance (s',t ) + 1
+              ; edit_distance (s ,t') + 1
+              ; edit_distance (s',t') + cost_to_drop_both
+              ]) ;;
+      val edit_distance : string * string -> int = <fun>
+
+      This new version of edit_distance is much more efficient than the one we started with; the following call is many thousands of times faster than it was without memoization:
+
+
+      # time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
+
+
+      Time: 0.344038ms
+      - : int = 2
+
 
 
 
