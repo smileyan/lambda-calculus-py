@@ -815,6 +815,72 @@ Chapter 8. Imperative Programming
       Time: 0.344038ms
       - : int = 2
 
+    Limitations of let rec
+
+      You might wonder why we didn't tie the recursive knot in memo_rec using let rec, as we did for make_rec earlier. Here's code that tries to do just that:
+
+      # let memo_rec f_norec =
+          let rec f = memoize (fun x -> f_norec f x) in
+          f
+        ;;
+      Characters 39-69:
+      Error: This kind of expression is not allowed as right-hand side of `let rec'
+
+      OCaml rejects the definition because OCaml, as a strict language, has limits on what it can put on the righthand side of a let rec. 
+      In particular, imagine how the following code snippet would be compiled:
+
+      let rec x = x + 1
+
+      Note that x is an ordinary value, not a function. As such, it's not clear how this definition should be handled by the compiler. 
+      You could imagine it compiling down to an infinite loop, but x is of type int, and there's no int that corresponds to an infinite loop. 
+      As such, this construct is effectively impossible to compile.
+
+      To avoid such impossible cases, the compiler only allows three possible constructs to show up on the righthand side of a let rec: 
+      1. a function definition, 
+      2. a constructor, 
+      3. or the lazy keyword. 
+      This excludes some reasonable things, like our definition of memo_rec, but it also blocks things that don't make sense, like our definition of x.
+
+      It's worth noting that these restrictions don't show up in a lazy language like Haskell. 
+      Indeed, we can make something like our definition of x work if we use OCaml's laziness:
+
+      # let rec x = lazy (Lazy.force x + 1);;
+       val x : int lazy_t = <lazy>
+
+      Of course, actually trying to compute this will fail. OCaml's lazy throws an exception when a lazy value tries to force itself as part of its own evaluation.
+
+      # Lazy.force x;;
+       Exception: Lazy.Undefined.
+
+      But we can also create useful recursive definitions with lazy. 
+      In particular, we can use laziness to make our definition of memo_rec work without explicit mutation:
+
+      # let lazy_memo_rec f_norec x =
+          let rec f = lazy (memoize (fun x -> f_norec (Lazy.force f) x)) in
+          (Lazy.force f) x
+        ;;
+      val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+      # time (fun () -> lazy_memo_rec fib_norec 40);;
+
+
+      Time: 0.041008ms
+      - : int = 102334155
+
+      Laziness is more constrained than explicit mutation, and so in some cases can lead to code whose behavior is easier to think about.
+
+  INPUT AND OUTPUT
+
+    Imperative programming is about more than modifying in-memory data structures. 
+    Any function that doesn't boil down to a deterministic transformation from its arguments to its return value is imperative in nature. 
+    That includes not only things that mutate your program's data, but also operations that interact with the world outside of your program. 
+    An important example of this kind of interaction is I/O, i.e., operations for reading or writing data to things like files, terminal input and output, and network sockets.
+
+    There are multiple I/O libraries in OCaml. In this section we'll discuss OCaml's buffered I/O library that can be used through the In_channel and Out_channel modules in Core. 
+    Other I/O primitives are also available through the Unix module in Core as well as Async, the asynchronous I/O library that is covered in Chapter 18, Concurrent Programming with Async. 
+    Most of the functionality in Core's In_channel and Out_channel (and in Core's Unix module) derives from the standard library, but we'll use Core's interfaces here.
+
+
+
 
 
 
