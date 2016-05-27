@@ -879,8 +879,64 @@ Chapter 8. Imperative Programming
     Other I/O primitives are also available through the Unix module in Core as well as Async, the asynchronous I/O library that is covered in Chapter 18, Concurrent Programming with Async. 
     Most of the functionality in Core's In_channel and Out_channel (and in Core's Unix module) derives from the standard library, but we'll use Core's interfaces here.
 
+    Terminal I/O
 
+      OCaml's buffered I/O library is organized around two types: in_channel, for channels you read from, and out_channel, for channels you write to. 
+      The In_channel and Out_channel modules only have direct support for channels corresponding to files and terminals; other kinds of channels can be created through the Unix module.
 
+      We'll start our discussion of I/O by focusing on the terminal. 
+      Following the UNIX model, communication with the terminal is organized around three channels, which correspond to the three standard file descriptors in Unix:
+
+      In_channel.stdin
+      The "standard input" channel. By default, input comes from the terminal, which handles keyboard input.
+
+      Out_channel.stdout
+      The "standard output" channel. By default, output written to stdout appears on the user terminal.
+
+      Out_channel.stderr
+      The "standard error" channel. This is similar to stdout but is intended for error messages.
+
+      The values stdin, stdout, and stderr are useful enough that they are also available in the global namespace directly, without having to go through the In_channel and Out_channel modules.
+
+      Let's see this in action in a simple interactive application. 
+      The following program, time_converter, prompts the user for a time zone, and then prints out the current time in that time zone. 
+      Here, we use Core's Zone module for looking up a time zone, and the Time module for computing the current time and printing it out in the time zone in question:
+
+      open Core.Std
+
+      let () =
+        Out_channel.output_string stdout "Pick a timezone: ";
+        Out_channel.flush stdout;
+        match In_channel.input_line stdin with
+        | None -> failwith "No timezone provided"
+        | Some zone_string ->
+          let zone = Zone.find_exn zone_string in
+          let time_string = Time.to_string_abs (Time.now ()) ~zone in
+        Out_channel.output_string stdout
+          (String.concat
+             ["The time in ";Zone.to_string zone;" is ";time_string;".\n"]);
+        Out_channel.flush stdout
+
+        We can build this program using corebuild and run it. You'll see that it prompts you for input, as follows:
+
+        $ corebuild time_converter.byte
+        $ ./time_converter.byte
+        Pick a timezone:
+
+        You can then type in the name of a time zone and hit Return, and it will print out the current time in the time zone in question:
+
+        Pick a timezone: Europe/London
+        The time in Europe/London is 2013-08-15 00:03:10.666220+01:00.
+
+        We called Out_channel.flush on stdout because out_channels are buffered, which is to say that OCaml doesn't immediately do a write every time you call output_string. 
+        Instead, writes are buffered until either enough has been written to trigger the flushing of the buffers, or until a flush is explicitly requested. 
+        This greatly increases the efficiency of the writing process by reducing the number of system calls.
+
+        Note that In_channel.input_line returns a string option, with None indicating that the input stream has ended (i.e., an end-of-file condition). 
+        Out_channel.output_string is used to print the final output, and Out_channel.flush is called to flush that output to the screen. 
+        The final flush is not technically required, since the program ends after that instruction, at which point all remaining output will be flushed anyway, but the explicit flush is nonetheless good practice.
+
+      Formatted Output with printf
 
 
 
