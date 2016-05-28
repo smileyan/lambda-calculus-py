@@ -938,6 +938,105 @@ Chapter 8. Imperative Programming
 
       Formatted Output with printf
 
+        Generating output with functions like Out_channel.output_string is simple and easy to understand, but can be a bit verbose. 
+        OCaml also supports formatted output using the printf function, which is modeled after printf in the C standard library. 
+        printf takes a format string that describes what to print and how to format it, as well as arguments to be printed, 
+        as determined by the formatting directives embedded in the format string. So, for example, we can write:
+
+        # printf "%i is an integer, %F is a float, \"%s\" is a string\n"
+            3 4.5 "five";;
+
+
+        3 is an integer, 4.5 is a float, "five" is a string
+        - : unit = ()
+
+        Unlike C's printf, the printf in OCaml is type-safe. 
+        In particular, if we provide an argument whose type doesn't match what's presented in the format string, we'll get a type error:
+
+        # printf "An integer: %i\n" 4.5;;
+        Characters 26-29:
+        Error: This expression has type float but an expression was expected of type
+                 int
+
+      Understanding Format Strings
+
+        The format strings used by printf turn out to be quite different from ordinary strings. 
+        This difference ties to the fact that OCaml format strings, unlike their equivalent in C, are type-safe. 
+        In particular, the compiler checks that the types referred to by the format string match the types of the rest of the arguments passed to printf.
+
+        To check this, OCaml needs to analyze the contents of the format string at compile time, 
+        which means the format string needs to be available as a string literal at compile time. 
+        Indeed, if you try to pass an ordinary string to printf, the compiler will complain:
+
+        # let fmt = "%i is an integer, %F is a float, \"%s\" is a string\n";;
+        val fmt : string = "%i is an integer, %F is a float, \"%s\" is a string\n"
+        #   printf fmt 3 4.5 "five";;
+        Characters 9-12:
+        Error: This expression has type string but an expression was expected of type
+                ('a -> 'b -> 'c -> 'd, out_channel, unit) format =
+                  ('a -> 'b -> 'c -> 'd, out_channel, unit, unit, unit, unit)
+                  format6
+
+        If OCaml infers that a given string literal is a format string, then it parses it at compile time as such, 
+        choosing its type in accordance with the formatting directives it finds. 
+        Thus, if we add a type annotation indicating that the string we're defining is actually a format string, it will be interpreted as such:
+
+        # let fmt : ('a, 'b, 'c) format =
+            "%i is an integer, %F is a float, \"%s\" is a string\n";;
+        val fmt : (int -> float -> string -> 'c, 'b, 'c) format = <abstr>
+
+        And accordingly, we can pass it to printf:
+
+        # printf fmt 3 4.5 "five";;
+
+
+        3 is an integer, 4.5 is a float, "five" is a string
+        - : unit = ()
+
+        If this looks different from everything else you've seen so far, that's because it is. 
+        This is really a special case in the type system. 
+        Most of the time, you don't need to worry about this special handling of format strings—you can just use printf and not worry about the details. 
+        But it's useful to keep the broad outlines of the story in the back of your head.
+
+        Now let's see how we can rewrite our time conversion program to be a little more concise using printf:
+
+        open Core.Std
+
+        let () =
+          printf "Pick a timezone: %!";
+          match In_channel.input_line stdin with
+          | None -> failwith "No timezone provided"
+          | Some zone_string ->
+            let zone = Time.Zone.find_exn zone_string in
+            let time_string = Time.to_string_abs (Time.now ()) ~zone in
+            printf "The time in %s is %s.\n%!" (Time.Zone.to_string zone) time_string
+
+        In the preceding example, we've used only two formatting directives: %s, for including a string, 
+        and %! which causes printf to flush the channel.
+
+        printf's formatting directives offer a significant amount of control, allowing you to specify things like:
+
+        Alignment and padding
+
+        Escaping rules for strings
+
+        Whether numbers should be formatted in decimal, hex, or binary
+
+        Precision of float conversions
+
+        There are also printf-style functions that target outputs other than stdout, including:
+
+        eprintf, which prints to stderr
+
+        fprintf, which prints to an arbitrary out_channel
+
+        sprintf, which returns a formatted string
+
+        All of this, and a good deal more, is described in the API documentation for the Printf module in the OCaml Manual.
+
+      File I/O
+
+
 
 
 
