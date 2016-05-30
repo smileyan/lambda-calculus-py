@@ -1124,5 +1124,73 @@ Chapter 8. Imperative Programming
 
     ORDER OF EVALUATION
 
+      The order in which expressions are evaluated is an important part of the definition of a programming language, and it is particularly important when programming imperatively. 
+      Most programming languages you're likely to have encountered are strict, and OCaml is, too. 
+      In a strict language, when you bind an identifier to the result of some expression, the expression is evaluated before the variable is bound. 
+      Similarly, if you call a function on a set of arguments, those arguments are evaluated before they are passed to the function.
+
+      Consider the following simple example. Here, we have a collection of angles, and we want to determine if any of them have a negative sin. The following snippet of code would answer that question:
+
+      # let x = sin 120. in
+        let y = sin 75.  in
+        let z = sin 128. in
+        List.exists ~f:(fun x -> x < 0.) [x;y;z]
+        ;;
+      - : bool = true
+
+      In some sense, we don't really need to compute the sin 128. because sin 75. is negative, so we could know the answer before even computing sin 128..
+
+      It doesn't have to be this way. Using the lazy keyword, we can write the original computation so that sin 128. won't ever be computed:
+
+      # let x = lazy (sin 120.) in
+        let y = lazy (sin 75.)  in
+        let z = lazy (sin 128.) in
+        List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
+        ;;
+      - : bool = true
+
+      We can confirm that fact by a few well-placed printfs:
+
+      # let x = lazy (printf "1\n"; sin 120.) in
+        let y = lazy (printf "2\n"; sin 75.)  in
+        let z = lazy (printf "3\n"; sin 128.) in
+        List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
+        ;;
+
+
+      1
+      2
+      - : bool = true
+
+      OCaml is strict by default for a good reason: lazy evaluation and imperative programming generally don't mix well because laziness makes it harder to reason about when a given side effect is going to occur. 
+      Understanding the order of side effects is essential to reasoning about the behavior of an imperative program.
+
+      In a strict language, we know that expressions that are bound by a sequence of let bindings will be evaluated in the order that they're defined. 
+      But what about the evaluation order within a single expression? Officially, the answer is that evaluation order within an expression is undefined. 
+      In practice, OCaml has only one compiler, and that behavior is a kind of de facto standard. Unfortunately, the evaluation order in this case is often the opposite of what one might expect.
+
+      Consider the following example:
+
+      # List.exists ~f:(fun x -> x < 0.)
+        [ (printf "1\n"; sin 120.);
+          (printf "2\n"; sin 75.);
+          (printf "3\n"; sin 128.); ]
+        ;;
+
+
+      3
+      2
+      1
+      - : bool = true
+
+      Here, you can see that the subexpression that came last was actually evaluated first! 
+      This is generally the case for many different kinds of expressions. 
+      If you want to make sure of the evaluation order of different subexpressions, you should express them as a series of let bindings.
+
+
+
+
+
+
 
 
