@@ -1187,10 +1187,100 @@ Chapter 8. Imperative Programming
       This is generally the case for many different kinds of expressions. 
       If you want to make sure of the evaluation order of different subexpressions, you should express them as a series of let bindings.
 
+    SIDE EFFECTS AND WEAK POLYMORPHISM
 
+      Consider the following simple, imperative function:
 
+        # let remember =
+            let cache = ref None in
+            (fun x ->
+              match !cache with
+              | Some y -> y
+              | None -> cache := Some x; x)
+          ;;
+        val remember : '_a -> '_a = <fun>
 
+        remember simply caches the first value that's passed to it, returning that value on every call. That's because cache is created and initialized once and is shared across invocations of remember.
 
+        remember is not a terribly useful function, but it raises an interesting question: what is its type?
 
+        On its first call, remember returns the same value it's passed, which means its input type and return type should match. 
+        Accordingly, remember should have type t -> t for some type t. 
+        There's nothing about remember that ties the choice of t to any particular type, so you might expect OCaml to generalize, replacing t with a polymorphic type variable. 
+        It's this kind of generalization that gives us polymorphic types in the first place. The identity function, as an example, gets a polymorphic type in this way:
 
+        # let identity x = x;;
+        val identity : 'a -> 'a = <fun>
+        # identity 3;;
+        - : int = 3
+        # identity "five";;
+        - : string = "five"
 
+        As you can see, the polymorphic type of identity lets it operate on values with different types.
+
+        This is not what happens with remember, though. As you can see from the above examples, the type that OCaml infers for remember looks almost, but not quite, like the type of the identity function. Here it is again:
+
+        val remember : '_a -> '_a = <fun>
+
+        The underscore in the type variable '_a tells us that the variable is only weakly polymorphic, which is to say that it can be used with any single type. 
+        That makes sense because, unlike identity, remember always returns the value it was passed on its first invocation, which means its return value must always have the same type.
+
+        OCaml will convert a weakly polymorphic variable to a concrete type as soon as it gets a clue as to what concrete type it is to be used as:
+
+        # let remember_three () = remember 3;;
+        val remember_three : unit -> int = <fun>
+        # remember;;
+        - : int -> int = <fun>
+        # remember "avocado";;
+        Characters 9-18:
+        Error: This expression has type string but an expression was expected of type
+                int
+
+        Note that the type of remember was settled by the definition of remember_three, even though remember_three was never called!
+
+      The Value Restriction
+
+        So, when does the compiler infer weakly polymorphic types? As we've seen, we need weakly polymorphic types when a value of unknown type is stored in a persistent mutable cell. 
+        Because the type system isn't precise enough to determine all cases where this might happen, OCaml uses a rough rule to flag cases that don't introduce any persistent mutable cells, 
+        and to only infer polymorphic types in those cases. This rule is called the value restriction.
+
+        The core of the value restriction is the observation that some kinds of expressions, which we'll refer to as simple values, by their nature can't introduce persistent mutable cells, including:
+
+        . Constants (i.e., things like integer and floating-point literals)
+
+        . Constructors that only contain other simple values
+
+        . Function declarations, i.e., expressions that begin with fun or function, or the equivalent let binding, let f x = ...
+
+        . let bindings of the form let var = expr1 in expr2, where both expr1 and expr2 are simple values
+
+        Thus, the following expression is a simple value, and as a result, the types of values contained within it are allowed to be polymorphic:
+
+        # (fun x -> [x;x]);;
+        - : 'a -> 'a list = <fun>
+
+        But, if we write down an expression that isn't a simple value by the preceding definition, we'll get different results. 
+        For example, consider what happens if we try to memoize the function defined previously.
+
+        # memoize (fun x -> [x;x]);;
+        - : '_a -> '_a list = <fun>
+
+        The memoized version of the function does in fact need to be restricted to a single type because it uses mutable state behind the scenes to cache values returned by previous invocations of the function. 
+        But OCaml would make the same determination even if the function in question did no such thing. Consider this example:
+
+        # identity (fun x -> [x;x]);;
+        - : '_a -> '_a list = <fun>
+
+        It would be safe to infer a fully polymorphic variable here, but because OCaml's type system doesn't distinguish between pure and impure functions, it can't separate those two cases.
+
+        The value restriction doesn't require that there is no mutable state, only that there is no persistent mutable state that could share values between uses of the same function. 
+        Thus, a function that produces a fresh reference every time it's called can have a fully polymorphic type:
+
+        # let f () = ref None;;
+        val f : unit -> 'a option ref = <fun>
+
+        But a function that has a mutable cache that persists across calls, like memoize, can only be weakly polymorphic.
+
+    Partial Application and the Value Restriction
+
+        
