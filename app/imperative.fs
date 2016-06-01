@@ -1283,4 +1283,35 @@ Chapter 8. Imperative Programming
 
     Partial Application and the Value Restriction
 
-        
+      Most of the time, when the value restriction kicks in, it's for a good reason, i.e., it's because the value in question can actually only safely be used with a single type. 
+      But sometimes, the value restriction kicks in when you don't want it. 
+      The most common such case is partially applied functions. 
+      A partially applied function, like any function application, is not a simple value, and as such, functions created by partial application are sometimes less general than you might expect.
+
+      Consider the List.init function, which is used for creating lists where each element is created by calling a function on the index of that element:
+
+      # List.init;;
+      - : int -> f:(int -> 'a) -> 'a list = <fun>
+      # List.init 10 ~f:Int.to_string;;
+      - : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
+
+      Imagine we wanted to create a specialized version of List.init that always created lists of length 10. We could do that using partial application, as follows:
+
+      # let list_init_10 = List.init 10;;
+      val list_init_10 : f:(int -> '_a) -> '_a list = <fun>
+
+      As you can see, we now infer a weakly polymorphic type for the resulting function. 
+      That's because there's nothing that guarantees that List.init isn't creating a persistent ref somewhere inside of it that would be shared across multiple calls to list_init_10. 
+      We can eliminate this possibility, and at the same time get the compiler to infer a polymorphic type, by avoiding partial application:
+
+      # let list_init_10 ~f = List.init 10 ~f;;
+      val list_init_10 : f:(int -> 'a) -> 'a list = <fun>
+
+      This transformation is referred to as eta expansion and is often useful to resolve problems that arise from the value restriction.
+
+    Relaxing the Value Restriction
+
+      
+
+
+
