@@ -1311,7 +1311,122 @@ Chapter 8. Imperative Programming
 
     Relaxing the Value Restriction
 
-      
+      OCaml is actually a little better at inferring polymorphic types than was suggested previously. 
+      The value restriction as we described it is basically a syntactic check: you can do a few operations that count as simple values, and anything that's a simple value can be generalized.
 
+      But OCaml actually has a relaxed version of the value restriction that can make use of type information to allow polymorphic types for things that are not simple values.
+
+      For example, we saw that a function application, even a simple application of the identity function, is not a simple value and thus can turn a polymorphic value into a weakly polymorphic one:
+
+      # identity (fun x -> [x;x]);;
+      - : '_a -> '_a list = <fun>
+
+      But that's not always the case. When the type of the returned value is immutable, then OCaml can typically infer a fully polymorphic type:
+
+      # identity [];;
+      - : 'a list = []
+
+      On the other hand, if the returned type is potentially mutable, then the result will be weakly polymorphic:
+
+      # [||];;
+      - : 'a array = [||]
+      # identity [||];;
+      - : '_a array = [||]
+
+      A more important example of this comes up when defining abstract data types. Consider the following simple data structure for an immutable list type that supports constant-time concatenation:
+
+      # module Concat_list : sig
+          type 'a t
+          val empty : 'a t
+          val singleton : 'a -> 'a t
+          val concat  : 'a t -> 'a t -> 'a t  (* constant time *)
+          val to_list : 'a t -> 'a list       (* linear time   *)
+        end = struct
+
+          type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t
+
+          let empty = Empty
+          let singleton x = Singleton x
+          let concat x y = Concat (x,y)
+
+          let rec to_list_with_tail t tail =
+            match t with
+            | Empty -> tail
+            | Singleton x -> x :: tail
+            | Concat (x,y) -> to_list_with_tail x (to_list_with_tail y tail)
+
+          let to_list t =
+            to_list_with_tail t []
+
+        end;;
+      module Concat_list :
+        sig
+          type 'a t
+          val empty : 'a t
+          val singleton : 'a -> 'a t
+          val concat : 'a t -> 'a t -> 'a t
+          val to_list : 'a t -> 'a list
+        end
+
+      The details of the implementation don't matter so much, but it's important to note that a Concat_list.t is unquestionably an immutable value. 
+      However, when it comes to the value restriction, OCaml treats it as if it were mutable:
+
+      # Concat_list.empty;;
+      - : 'a Concat_list.t = <abstr>
+      # identity Concat_list.empty;;
+      - : '_a Concat_list.t = <abstr>
+
+      The issue here is that the signature, by virtue of being abstract, has obscured the fact that Concat_list.t is in fact an immutable data type. 
+      We can resolve this in one of two ways: either by making the type concrete (i.e., exposing the implementation in the mli), which is often not desirable; 
+      or by marking the type variable in question as covariant. 
+      We'll learn more about covariance and contravariance in Chapter 11, Objects, but for now, you can think of it as an annotation that can be put in the interface of a pure data structure.
+
+      In particular, if we replace type 'a t in the interface with type +'a t, that will make it explicit in the interface that the data structure doesn't contain any persistent references to values of type 'a, 
+      at which point, OCaml can infer polymorphic types for expressions of this type that are not simple values:
+
+      # module Concat_list : sig
+          type 'a t
+          val empty : 'a t
+          val singleton : 'a -> 'a t
+          val concat  : 'a t -> 'a t -> 'a t  (* constant time *)
+          val to_list : 'a t -> 'a list       (* linear time   *)
+        end = struct
+
+          type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t
+
+          ...
+
+        end;;
+      module Concat_list :
+        sig
+          type 'a t
+          val empty : 'a t
+          val singleton : 'a -> 'a t
+          val concat : 'a t -> 'a t -> 'a t
+          val to_list : 'a t -> 'a list
+        end
+
+      Now, we can apply the identity function to Concat_list.empty without without losing any polymorphism:
+
+      # identity Concat_list.empty;;
+      - : 'a Concat_list.t = <abstr>
+
+  SUMMARY
+
+    This chapter has covered quite a lot of ground, including:
+
+    Discussing the building blocks of mutable data structures as well as the basic imperative constructs like for loops, while loops, and the sequencing operator ;
+
+    Walking through the implementation of a couple of classic imperative data structures
+
+    Discussing so-called benign effects like memoization and laziness
+
+    Covering OCaml's API for blocking I/O
+
+    Discussing how language-level issues like order of evaluation and weak polymorphism interact with OCaml's imperative features
+
+    The scope and sophistication of the material here is an indication of the importance of OCaml's imperative features. 
+    The fact that OCaml defaults to immutability shouldn't obscure the fact that imperative programming is a fundamental part of building any serious application, 
+    and that if you want to be an effective OCaml programmer, you need to understand OCaml's approach to imperative programming.
 
 
