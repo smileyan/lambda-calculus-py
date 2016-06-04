@@ -40,6 +40,48 @@ Chapter 9. Functors
       end;;
     module Increment : functor (M : X_int) -> X_int
 
+    One thing that immediately jumps out is that functors are more syntactically heavyweight than ordinary functions. 
+    For one thing, functors require explicit (module) type annotations, which ordinary functions do not. 
+    Technically, only the type on the input is mandatory, although in practice, you should usually constrain the module returned by the functor, 
+    just as you should use an mli, even though it's not mandatory.
+
+    The following shows what happens when we omit the module type for the output of the functor:
+
+    # module Increment (M : X_int) = struct
+        let x = M.x + 1
+      end;;
+    module Increment : functor (M : X_int) -> sig val x : int end
+
+    We can see that the inferred module type of the output is now written out explicitly, 
+    rather than being a reference to the named signature X_int.
+
+    We can use Increment to define new modules:
+
+    # module Three = struct let x = 3 end;;
+    module Three : sig val x : int end
+    # module Four = Increment(Three);;
+    module Four : sig val x : int end
+    # Four.x - Three.x;;
+    - : int = 1
+
+    In this case, we applied Increment to a module whose signature is exactly equal to X_int. 
+    But we can apply Increment to any module that satisfies the interface X_int, in the same way that the contents of an ml file must satisfy the mli. 
+    That means that the module type can omit some information available in the module, either by dropping fields or by leaving some fields abstract. 
+    Here's an example:
+
+    # module Three_and_more = struct
+        let x = 3
+        let y = "three"
+    end;;
+    module Three_and_more : sig val x : int val y : string end
+    # module Four = Increment(Three_and_more);;
+    module Four : sig val x : int end
+
+    The rules for determining whether a module matches a given signature are similar in spirit to the rules in an object-oriented language 
+    that determine whether an object satisfies a given interface. 
+    As in an object-oriented context, the extra information that doesn't match the signature you're looking for (in this case, the variable y) is simply ignored.
+
+  A BIGGER EXAMPLE: COMPUTING WITH INTERVALS
 
 
 
