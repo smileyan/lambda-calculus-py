@@ -83,8 +83,80 @@ Chapter 9. Functors
 
   A BIGGER EXAMPLE: COMPUTING WITH INTERVALS
 
+    Let's consider a more realistic example of how to use functors: a library for computing with intervals. 
+    Intervals are a common computational object, and they come up in different contexts and for different types. 
+    You might need to work with intervals of floating-point values or strings or times, and in each of these cases, 
+    you want similar operations: testing for emptiness, checking for containment, intersecting intervals, and so on.
 
+    Let's see how to use functors to build a generic interval library that can be used with any type 
+    that supports a total ordering on the underlying set over which you want to build intervals.
 
+    First we'll define a module type that captures the information we'll need about the endpoints of the intervals. 
+    This interface, which we'll call Comparable, contains just two things: a comparison function and the type of the values to be compared:
 
+    # module type Comparable = sig
+        type t
+        val compare : t -> t -> int
+      end ;;
+    module type Comparable = sig type t val compare : t -> t -> int end
 
+    The comparison function follows the standard OCaml idiom for such functions, 
+    returning 0 if the two elements are equal, a positive number if the first element is larger than the second, 
+    and a negative number if the first element is smaller than the second. Thus, we could rewrite the standard comparison functions on top of compare.
 
+    compare x y < 0     (* x < y *)
+    compare x y = 0     (* x = y *)
+    compare x y > 0     (* x > y *)
+
+    (This idiom is a bit of a historical error. 
+    It would be better if compare returned a variant with three cases for less than, greater than, and equal. 
+    But it's a well-established idiom at this point, and unlikely to change.)
+
+    The functor for creating the interval module follows. 
+    We represent an interval with a variant type, which is either Empty or Interval (x,y), where x and y are the bounds of the interval. 
+    In addition to the type, the body of the functor contains implementations of a number of useful primitives for interacting with intervals:
+
+    # module Make_interval(Endpoint : Comparable) = struct
+
+      type t = | Interval of Endpoint.t * Endpoint.t
+              | Empty
+
+      (** [create low high] creates a new interval from [low] to
+          [high].  If [low > high], then the interval is empty *)
+      let create low high =
+        if Endpoint.compare low high > 0 then Empty
+        else Interval (low,high)
+
+      (** Returns true iff the interval is empty *)
+      let is_empty = function
+        | Empty -> true
+        | Interval _ -> false
+
+      (** [contains t x] returns true iff [x] is contained in the
+          interval [t] *)
+      let contains t x =
+        match t with
+        | Empty -> false
+        | Interval (l,h) ->
+          Endpoint.compare x l >= 0 && Endpoint.compare x h <= 0
+
+      (** [intersect t1 t2] returns the intersection of the two input
+          intervals *)
+      let intersect t1 t2 =
+        let min x y = if Endpoint.compare x y <= 0 then x else y in
+        let max x y = if Endpoint.compare x y >= 0 then x else y in
+        match t1,t2 with
+        | Empty, _ | _, Empty -> Empty
+        | Interval (l1,h1), Interval (l2,h2) ->
+          create (max l1 l2) (min h1 h2)
+
+    end ;;
+  module Make_interval :
+    functor (Endpoint : Comparable) ->
+      sig
+        type t = Interval of Endpoint.t * Endpoint.t | Empty
+        val create : Endpoint.t -> Endpoint.t -> t
+        val is_empty : t -> bool
+        val contains : t -> Endpoint.t -> bool
+        val intersect : t -> t -> t
+      end
