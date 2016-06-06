@@ -160,3 +160,59 @@ Chapter 9. Functors
         val contains : t -> Endpoint.t -> bool
         val intersect : t -> t -> t
       end
+
+  We can instantiate the functor by applying it to a module with the right signature. 
+  In the following code, rather than name the module first and then call the functor, we provide the functor input as an anonymous module:
+
+  # module Int_interval =
+      Make_interval(struct
+        type t = int
+        let compare = Int.compare
+      end);;
+  module Int_interval :
+    sig
+      type t = Interval of int * int | Empty
+      val create : int -> int -> t
+      val is_empty : t -> bool
+      val contains : t -> int -> bool
+      val intersect : t -> t -> t
+    end
+
+  If the input interface for your functor is aligned with the standards of the libraries you use, 
+  then you don't need to construct a custom module to feed to the functor. In this case, we can directly use the Int or String modules provided by Core:
+
+  # module Int_interval = Make_interval(Int) ;;
+  module Int_interval :
+    sig
+      type t = Make_interval(Core.Std.Int).t = Interval of int * int | Empty
+      val create : int -> int -> t
+      val is_empty : t -> bool
+      val contains : t -> int -> bool
+      val intersect : t -> t -> t
+    end
+  # module String_interval = Make_interval(String) ;;
+  module String_interval :
+    sig
+      type t =
+        Make_interval(Core.Std.String).t =
+          Interval of string * string
+        | Empty
+      val create : string -> string -> t
+      val is_empty : t -> bool
+      val contains : t -> string -> bool
+      val intersect : t -> t -> t
+    end
+
+  This works because many modules in Core, including Int and String, satisfy an extended version of the Comparable signature described previously. 
+  Such standardized signatures are good practice, both because they make functors easier to use, 
+  and because they encourage standardization that makes your codebase easier to navigate.
+
+  We can use the newly defined Int_interval module like any ordinary module:
+
+  # let i1 = Int_interval.create 3 8;;
+  val i1 : Int_interval.t = Int_interval.Interval (3, 8)
+  # let i2 = Int_interval.create 4 10;;
+  val i2 : Int_interval.t = Int_interval.Interval (4, 10)
+  # Int_interval.intersect i1 i2;;
+  - : Int_interval.t = Int_interval.Interval (4, 8)
+
