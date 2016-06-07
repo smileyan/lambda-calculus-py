@@ -216,3 +216,53 @@ Chapter 9. Functors
   # Int_interval.intersect i1 i2;;
   - : Int_interval.t = Int_interval.Interval (4, 8)
 
+  This design gives us the freedom to use any comparison function we want for comparing the endpoints. 
+  We could, for example, create a type of integer interval with the order of the comparison reversed, as follows:
+
+  We can use the newly defined Int_interval module like any ordinary module:
+
+  # let i1 = Int_interval.create 3 8;;
+  val i1 : Int_interval.t = Int_interval.Interval (3, 8)
+  # let i2 = Int_interval.create 4 10;;
+  val i2 : Int_interval.t = Int_interval.Interval (4, 10)
+  # Int_interval.intersect i1 i2;;
+  - : Int_interval.t = Int_interval.Interval (4, 8)
+
+  This design gives us the freedom to use any comparison function we want for comparing the endpoints. 
+  We could, for example, create a type of integer interval with the order of the comparison reversed, as follows:
+
+  # module Rev_int_interval =
+      Make_interval(struct
+        type t = int
+        let compare x y = Int.compare y x
+      end);;
+  module Rev_int_interval :
+    sig
+      type t = Interval of int * int | Empty
+      val create : int -> int -> t
+      val is_empty : t -> bool
+      val contains : t -> int -> bool
+      val intersect : t -> t -> t
+    end
+
+  The behavior of Rev_int_interval is of course different from Int_interval:
+
+  # let interval = Int_interval.create 4 3;;
+  val interval : Int_interval.t = Int_interval.Empty
+  # let rev_interval = Rev_int_interval.create 4 3;;
+  val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
+
+  Importantly, Rev_int_interval.t is a different type than Int_interval.t, even though its physical representation is the same. Indeed, the type system will prevent us from confusing them.
+
+  # Int_interval.contains rev_interval 3;;
+  Characters 22-34:
+  Error: This expression has type Rev_int_interval.t
+        but an expression was expected of type Int_interval.t
+
+  This is important, because confusing the two kinds of intervals would be a semantic error, and it's an easy one to make. The ability of functors to mint new types is a useful trick that comes up a lot.
+
+
+
+
+
+
