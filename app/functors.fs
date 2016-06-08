@@ -261,8 +261,48 @@ Chapter 9. Functors
 
   This is important, because confusing the two kinds of intervals would be a semantic error, and it's an easy one to make. The ability of functors to mint new types is a useful trick that comes up a lot.
 
+  Making the Functor Abstract
 
+  There's a problem with Make_interval. The code we wrote depends on the invariant that the upper bound of an interval is greater than its lower bound, 
+  but that invariant can be violated. The invariant is enforced by the create function, but because Interval.t is not abstract, we can bypass the create function:
 
+  # Int_interval.is_empty (* going through create *)
+      (Int_interval.create 4 3) ;;
+  - : bool = true
+  # Int_interval.is_empty (* bypassing create *)
+      (Int_interval.Interval (4,3)) ;;
+  - : bool = false
 
+  To make Int_interval.t abstract, we need to restrict the output of Make_interval with an interface. Here's an explicit interface that we can use for that purpose:
 
+  # module type Interval_intf = sig
+      type t
+      type endpoint
+      val create : endpoint -> endpoint -> t
+      val is_empty : t -> bool
+      val contains : t -> endpoint -> bool
+      val intersect : t -> t -> t
+      end;;
+    module type Interval_intf =
+      sig
+        type t
+        type endpoint
+        val create : endpoint -> endpoint -> t
+        val is_empty : t -> bool
+        val contains : t -> endpoint -> bool
+        val intersect : t -> t -> t
+      end
+
+  This interface includes the type endpoint to give us a way of referring to the endpoint type. 
+  Given this interface, we can redo our definition of Make_interval. Notice that we added the type endpoint to the implementation of the module to match Interval_intf:
+
+  # module Make_interval(Endpoint : Comparable) : Interval_intf = struct
+      type endpoint = Endpoint.t
+      type t = | Interval of Endpoint.t * Endpoint.t
+               | Empty
+
+      ...
+
+    end ;;
+    module Make_interval : functor (Endpoint : Comparable) -> Interval_intf
 
