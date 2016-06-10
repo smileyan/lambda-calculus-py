@@ -378,6 +378,43 @@ Chapter 9. Functors
           val intersect : t -> t -> t
         end
 
+    So now, the interface is as it was, except that endpoint is known to be equal to Endpoint.t. 
+    As a result of that type equality, we can again do things that require that endpoint be exposed, like constructing intervals:
 
+    # module Int_interval = Make_interval(Int);;
+    module Int_interval :
+      sig
+        type t = Make_interval(Core.Std.Int).t
+        type endpoint = int
+        val create : endpoint -> endpoint -> t
+        val is_empty : t -> bool
+        val contains : t -> endpoint -> bool
+        val intersect : t -> t -> t
+      end
+    # let i = Int_interval.create 3 4;;
+    val i : Int_interval.t = <abstr>
+    # Int_interval.contains i 5;;
+    - : bool = false
 
+  Destructive Substitution
+
+    Sharing constraints basically do the job, but they have some downsides. 
+    In particular, we've now been stuck with the useless type declaration of endpoint that clutters up both the interface and the implementation. 
+    A better solution would be to modify the Interval_intf signature by replacing endpoint with Endpoint.t everywhere it shows up, and deleting the definition of endpoint from the signature. 
+    We can do just this using what's called destructive substitution. Here's the basic syntax:
+
+    <Module_type> with type <type> := <type'>
+
+    The following shows how we could use this with Make_interval:
+
+    # module type Int_interval_intf =
+        Interval_intf with type endpoint := int;;
+    module type Int_interval_intf =
+      sig
+        type t
+        val create : int -> int -> t
+        val is_empty : t -> bool
+        val contains : t -> int -> bool
+        val intersect : t -> t -> t
+      end
 
