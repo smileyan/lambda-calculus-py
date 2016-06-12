@@ -418,3 +418,46 @@ Chapter 9. Functors
         val intersect : t -> t -> t
       end
 
+    There's now no endpoint type: all of its occurrences of have been replaced by int. 
+    As with sharing constraints, we can also use this in the context of a functor:
+
+    # module Make_interval(Endpoint : Comparable)
+      : Interval_intf with type endpoint := Endpoint.t =
+    struct
+
+      type t = | Interval of Endpoint.t * Endpoint.t
+               | Empty
+
+      ...
+
+    end ;;
+    module Make_interval :
+      functor (Endpoint : Comparable) ->
+      sig
+        type t
+        val create : Endpoint.t -> Endpoint.t -> t
+        val is_empty : t -> bool
+        val contains : t -> Endpoint.t -> bool
+        val intersect : t -> t -> t
+      end
+
+    The interface is precisely what we want: the type t is abstract, and the type of the endpoint is exposed; 
+    so we can create values of type Int_interval.t using the creation function, 
+    but not directly using the constructors and thereby violating the invariants of the module:
+
+    # module Int_interval = Make_interval(Int);;
+    module Int_interval :
+      sig
+        type t = Make_interval(Core.Std.Int).t
+        val create : int -> int -> t
+        val is_empty : t -> bool
+        val contains : t -> int -> bool
+        val intersect : t -> t -> t
+      end
+    # Int_interval.is_empty
+        (Int_interval.create 3 4);;
+    - : bool = false
+    # Int_interval.is_empty
+        (Int_interval.Interval (4,3));;
+    Characters 40-48:
+    Error: Unbound constructor Int_interval.Interval
