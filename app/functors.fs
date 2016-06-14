@@ -461,3 +461,7 @@ Chapter 9. Functors
         (Int_interval.Interval (4,3));;
     Characters 40-48:
     Error: Unbound constructor Int_interval.Interval
+
+    In addition, the endpoint type is gone from the interface, meaning we no longer need to define the endpoint type alias in the body of the module.
+
+    It's worth noting that the name is somewhat misleading, in that there's nothing destructive about destructive substitution; it's really just a way of creating a new signature by transforming an existing one.
