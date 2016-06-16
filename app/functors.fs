@@ -464,4 +464,12 @@ Chapter 9. Functors
 
     In addition, the endpoint type is gone from the interface, meaning we no longer need to define the endpoint type alias in the body of the module.
 
-    It's worth noting that the name is somewhat misleading, in that there's nothing destructive about destructive substitution; it's really just a way of creating a new signature by transforming an existing one.
+    It's worth noting that the name is somewhat misleading, in that there's nothing destructive about destructive substitution; 
+    it's really just a way of creating a new signature by transforming an existing one.
+
+  Using Multiple Interfaces
+
+    Another feature that we might want for our interval module is the ability to serialize, i.e., to be able to read and write intervals as a stream of bytes. 
+    In this case, we'll do this by converting to and from s-expressions, which were mentioned already in Chapter 7, Error Handling. 
+    To recall, an s-expression is essentially a parenthesized expression whose atoms are strings, and it is a serialization format that is used commonly in Core. 
+    Here's an example:
