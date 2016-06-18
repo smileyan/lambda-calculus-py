@@ -473,3 +473,18 @@ Chapter 9. Functors
     In this case, we'll do this by converting to and from s-expressions, which were mentioned already in Chapter 7, Error Handling. 
     To recall, an s-expression is essentially a parenthesized expression whose atoms are strings, and it is a serialization format that is used commonly in Core. 
     Here's an example:
+
+    # Sexp.of_string "(This is (an s-expression))";;
+    - : Sexp.t = (This is (an s-expression))
+
+    Core comes with a syntax extension called Sexplib which can autogenerate s-expression conversion functions from a type declaration. 
+    Attaching with sexp to a type definition signals to the extension to generate the converters. Thus, we can write:
+
+    # type some_type = int * string list with sexp;;
+     type some_type = int * string list
+     val some_type_of_sexp : Sexp.t -> int * string list = <fun>
+     val sexp_of_some_type : int * string list -> Sexp.t = <fun>
+    # sexp_of_some_type (33, ["one"; "two"]);;
+     - : Sexp.t = (33 (one two))
+    # Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
+     - : int * string list = (44, ["five"; "six"])
